@@ -1,0 +1,203 @@
+@{
+    ViewData["Title"] = "AddMenuItem";
+}
+@model cafe.Models.MenuItem
+@{
+    ViewData["Title"] = Model.ItemId > 0 ? "Edit Menu Item" : "Add Menu Item";
+
+    var isEdit = Model.ItemId > 0;
+}
+
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-xl-8 col-lg-10">
+            <div class="card shadow-xl border-0 rounded-4 overflow-hidden">
+                <!-- Header -->
+                <div class="card-header p-0 bg-gradient-primary text-white rounded-top-4 overflow-hidden">
+                    <div class="p-5 text-center position-relative">
+                        <div class="position-absolute top-4 start-4">
+                            <i class="fas fa-@(isEdit ? "edit" : "plus") fa-2x opacity-75"></i>
+                        </div>
+                        <div>
+                            <h2 class="mb-2 fw-bold display-5">@(isEdit ? "Edit" : "Add New") Menu Item</h2>
+                            <p class="lead opacity-90 mb-0">@(isEdit ? Model.ItemName : "Create delicious menu item")</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Body -->
+                <div class="card-body p-0">
+                    <!-- Validation Alert -->
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-danger border-0 m-4 rounded-3">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            @Html.ValidationSummary(false)
+                        </div>
+                    }
+
+                    <!-- Form -->
+                    <form asp-action="@(isEdit ? "EditMenuItem" : "AddMenuItem")" method="post" enctype="multipart/form-data" class="p-5">
+                        @Html.AntiForgeryToken()
+                        @if (isEdit) { <input type="hidden" asp-for="ItemId" /> }
+
+                        <div class="row g-4">
+                            <!-- Image Upload -->
+                            <div class="col-lg-4">
+                                <label class="form-label fw-bold fs-5 mb-3 d-block text-center text-muted">
+                                    Menu Photo
+                                </label>
+                                <div class="image-upload-container position-relative mx-auto" style="width: 200px; height: 200px;">
+                                    <div id="imagePreview" class="preview-area rounded-4 border-2 border-dashed border-secondary d-flex align-items-center justify-content-center text-center p-4 position-relative overflow-hidden">
+                                        @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                                        {
+                                            <img src="@Url.Content(Model.ImageUrl)" alt="@Model.ItemName" class="img-fluid rounded-3 shadow" style="width: 100%; height: 100%; object-fit: cover;">
+                                        }
+                                        else
+                                        {
+                                            <div>
+                                                <i class="fas fa-image fa-4x text-muted mb-3"></i>
+                                                <p class="mb-0 text-muted small">Upload photo</p>
+                                            </div>
+                                        }
+                                    </div>
+                                    <input type="file" name="imageFile" accept="image/*" class="image-upload-input" onchange="handleImageUpload(this)">
+                                    <div class="upload-overlay position-absolute inset-0 d-none">
+                                        <i class="fas fa-camera fa-2x text-white"></i>
+                                    </div>
+                                </div>
+                                <small class="text-muted d-block text-center mt-2">JPG, PNG (Max 2MB)</small>
+                            </div>
+
+                            <!-- Form Fields -->
+                            <div class="col-lg-8">
+                                <div class="row g-4">
+                                    <!-- Item Name -->
+                                    <div class="col-12">
+                                        <label asp-for="ItemName" class="form-label fw-bold fs-5 mb-2">
+                                            Item Name <span class="text-danger">*</span>
+                                        </label>
+                                        <input asp-for="ItemName" class="form-control form-control-lg shadow-sm @GetValidationClass("ItemName")" 
+                                               placeholder="e.g., Chicken Biryani, Cappuccino" />
+                                        <span asp-validation-for="ItemName" class="text-danger small"></span>
+                                    </div>
+
+                                    <!-- Category -->
+                                    <div class="col-md-6">
+                                        <label asp-for="CategoryId" class="form-label fw-bold fs-5 mb-2">
+                                            Category <span class="text-danger">*</span>
+                                        </label>
+                                        <select asp-for="CategoryId" asp-items="ViewBag.Categories" 
+                                                class="form-select form-select-lg shadow-sm @GetValidationClass("CategoryId")">
+                                            <option value="">Choose category...</option>
+                                        </select>
+                                        <span asp-validation-for="CategoryId" class="text-danger small"></span>
+                                    </div>
+
+                                    <!-- Price -->
+                                    <div class="col-md-6">
+                                        <label asp-for="Price" class="form-label fw-bold fs-5 mb-2">
+                                            Price <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="input-group input-group-lg">
+                                            <span class="input-group-text bg-success text-white fs-6 fw-bold">₹</span>
+                                            <input asp-for="Price" type="number" step="0.01" min="0" 
+                                                   class="form-control form-control-lg shadow-sm @GetValidationClass("Price")" />
+                                        </div>
+                                        <span asp-validation-for="Price" class="text-danger small"></span>
+                                    </div>
+
+                                    <!-- Availability Toggle -->
+                                    <div class="col-12">
+                                        <div class="form-check form-switch form-switch-xl p-4 bg-light rounded-4 shadow-sm">
+                                            <input asp-for="IsAvailable" class="form-check-input" type="checkbox" id="isAvailable" />
+                                            <label asp-for="IsAvailable" class="form-check-label fw-bold fs-5 mb-0" for="isAvailable">
+                                                Available for Orders
+                                            </label>
+                                            <small class="ms-auto text-muted">
+                                               @(Model.IsAvailable == true ? "✅ Live on customer menu" : "⏸️ Hidden from menu")
+                                            </small>
+                                        </div>
+                                    </div>
+
+                                    <!-- Description -->
+                                    <div class="col-12">
+                                                                                <label asp-for="Description" class="form-label fw-bold fs-5 mb-2">
+                                            Description
+                                        </label>
+                                        <textarea asp-for="Description" class="form-control shadow-sm @GetValidationClass("Description")" 
+                                                  rows="4" placeholder="Tempting description that makes customers hungry..."></textarea>
+                                        <span asp-validation-for="Description" class="text-danger small"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex gap-3 justify-content-end mt-6 pt-4 border-top">
+                            <a asp-action="MenuItems" class="btn btn-outline-secondary btn-lg px-5 shadow-sm">
+                                <i class="fas fa-arrow-left me-2"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-success btn-lg px-5 shadow-sm">
+                                <i class="fas fa-@(isEdit ? "save" : "plus")-circle me-2"></i>
+                                @(isEdit ? "Update Item" : "Add Item")
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+        <script>
+    function handleImageUpload(input) {
+        const preview = document.getElementById('imagePreview');
+        const overlay = document.querySelector('.upload-overlay');
+        
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.innerHTML = `<img src="${e.target.result}" alt="Preview" class="img-fluid rounded-3 shadow" style="width: 100%; height: 100%; object-fit: cover;">`;
+                overlay.classList.remove('d-none');
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    // Price formatting
+    document.getElementById('Price').addEventListener('input', function() {
+        let value = parseFloat(this.value);
+        if (value) {
+            this.value = value.toFixed(2);
+        }
+    });
+
+    // Form validation enhancement
+    (function() {
+        'use strict';
+        window.addEventListener('load', function() {
+            var forms = document.getElementsByClassName('needs-validation');
+            Array.prototype.filter.call(forms, function(form) {
+                form.addEventListener('submit', function(event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        });
+    })();
+    </script>
+}
+
+@functions {
+    public string GetValidationClass(string fieldName)
+    {
+        if (!ViewData.ModelState.ContainsKey(fieldName)) return "";
+        return ViewData.ModelState[fieldName].Errors.Any() ? "is-invalid" : "is-valid";
+    }
+}

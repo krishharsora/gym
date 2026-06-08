@@ -1,0 +1,133 @@
+@{
+    ViewData["Title"] = "Payments";
+}
+@model IEnumerable<cafe.Models.Payment>
+@{
+    ViewData["Title"] = "Payments Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid py-5 bg-gradient-admin" style="background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); min-height: 100vh;">
+    <!-- Stats Cards -->
+    <div class="row mb-5 g-4">
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 shadow-lg h-100 text-center rounded-4 overflow-hidden animate__fadeInUp">
+                <div class="card-body py-5">
+                    <div class="icon-wrapper mb-3 mx-auto">
+                        <i class="fas fa-credit-card fa-3x bg-gradient-success text-white rounded-circle p-4 shadow"></i>
+                    </div>
+                    <h3 class="display-4 fw-bold text-primary mb-1">@Model.Count()</h3>
+                    <p class="text-muted mb-0 fs-5">Total Payments</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 shadow-lg h-100 text-center rounded-4 overflow-hidden animate__fadeInUp" style="animation-delay: 0.1s;">
+                <div class="card-body py-5">
+                    <div class="icon-wrapper mb-3 mx-auto">
+                        <i class="fas fa-check-circle fa-3x bg-gradient-success text-white rounded-circle p-4 shadow"></i>
+                    </div>
+                    <h3 class="display-4 fw-bold text-success mb-1">@Model.Count(p => p.PaymentStatus == "Paid")</h3>
+                    <p class="text-muted mb-0 fs-5">Paid</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 shadow-lg h-100 text-center rounded-4 overflow-hidden animate__fadeInUp" style="animation-delay: 0.2s;">
+                <div class="card-body py-5">
+                    <div class="icon-wrapper mb-3 mx-auto">
+                        <i class="fas fa-clock fa-3x bg-gradient-warning text-white rounded-circle p-4 shadow"></i>
+                    </div>
+                    <h3 class="display-4 fw-bold text-warning mb-1">@Model.Count(p => p.PaymentStatus == "Pending")</h3>
+                    <p class="text-muted mb-0 fs-5">Pending</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 shadow-lg h-100 text-center rounded-4 overflow-hidden animate__fadeInUp" style="animation-delay: 0.3s;">
+                <div class="card-body py-5">
+                    <div class="icon-wrapper mb-3 mx-auto">
+                        <i class="fas fa-rupee-sign fa-3x bg-gradient-primary text-white rounded-circle p-4 shadow"></i>
+                    </div>
+                    <h3 class="display-4 fw-bold text-info mb-1">₹@Model.Where(p => p.PaymentStatus == "Paid").Sum(p => p.Amount)</h3>
+                    <p class="text-muted mb-0 fs-5">Total Revenue</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payments Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-2xl rounded-4 overflow-hidden">
+                <div class="card-header bg-gradient-primary p-4 rounded-top-4 position-relative">
+                    <h4 class="mb-0 text-white fw-bold"><i class="fas fa-list me-3"></i>Recent Payments</h4>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Order</th>
+                                    <th>Customer</th>
+                                    <th>Method</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody class="table-group-divider">
+                                @foreach (var item in Model.OrderByDescending(p => p.PaidAt))
+                                {
+                                    <tr class="animate__fadeInUp" style="animation-delay: @(0.1 * Model.ToList().IndexOf(item))s;">
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-2 me-2">
+                                                    <i class="fas fa-hashtag fs-6"></i>
+                                                </div>
+                                                <strong>#@item.PaymentId</strong>
+                                            </td>
+                                        <td><span class="badge bg-light text-dark">#@item.OrderId</span></td>
+                                        <td>
+                                            <div>
+                                                <div class="fw-bold">@item.Order?.Customer?.Name</div>
+                                                <small class="text-muted">@item.Order?.Customer?.Phone</small>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge px-3 py-2 rounded-pill fw-semibold fs-6 @(item.PaymentMethod == "UPI" ? "bg-gradient-primary" : "bg-gradient-warning") text-white">
+                                                <i class="fas @(item.PaymentMethod == "UPI" ? "fa-mobile-alt" : "fa-money-bill-wave") me-1"></i>
+                                                @item.PaymentMethod
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <strong class="text-success fs-5">₹@item.Amount</strong>
+                                        </td>
+                                        <td>
+                                            <span class="badge px-3 py-2 rounded-pill fw-semibold fs-6 @(item.PaymentStatus == "Paid" ? "bg-gradient-success" : "bg-gradient-warning") text-white">
+                                                <i class="fas fa-circle-check me-1"></i>@item.PaymentStatus
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">@item.PaidAt?.ToString("MMM dd")</small><br>
+                                            <small class="fw-bold">@item.PaidAt?.ToString("hh:mm tt")</small>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-gradient-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important; }
+    .bg-gradient-success { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) !important; }
+    .bg-gradient-warning { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%) !important; }
+    .shadow-2xl { box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15) !important; }
+    .icon-wrapper { width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; }
+</style>

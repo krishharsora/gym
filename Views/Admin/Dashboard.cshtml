@@ -1,0 +1,478 @@
+@model dynamic
+@{
+    ViewData["Title"] = "Admin Dashboard";
+    
+    var todayRevenue = ViewBag.TodayRevenue as decimal? ?? 0;
+    var totalRevenue = ViewBag.TotalRevenue as decimal? ?? 0;
+    var activeTables = ViewBag.ActiveTables as int? ?? 0;
+    var totalTables = ViewBag.TotalTables as int? ?? 0;
+    var pendingOrders = ViewBag.PendingOrders as int? ?? 0;
+    var preparingOrders = ViewBag.PreparingOrders as int? ?? 0;
+    var totalFeedback = ViewBag.TotalFeedback as int? ?? 0;
+    var avgRating = ViewBag.AverageRating as double? ?? 0;
+    var recentOrders = ViewBag.RecentOrders as List<dynamic> ?? new List<dynamic>();
+    var monthlyRevenue = ViewBag.MonthlyRevenue as List<dynamic> ?? new List<dynamic>();
+    var recentActivity = ViewBag.RecentActivity as List<dynamic> ?? new List<dynamic>();
+}
+
+<div class="dashboard-wrapper min-vh-100 bg-gradient-light">
+    <!-- Hero Header -->
+    <div class="page-header bg-gradient-primary position-relative overflow-hidden">
+        <div class="container-fluid py-5">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h1 class="page-title text-white mb-2 display-4 fw-bold">
+                        <i class="fas fa-tachometer-alt me-3"></i>
+                        Cafe Dashboard
+                    </h1>
+                    <div class="row g-3 text-white-50">
+                        <div class="col-auto">
+                            <span><i class="fas fa-calendar-day me-1"></i>@DateTime.Now.ToString("MMMM dd, yyyy")</span>
+                        </div>
+                        <div class="col-auto">
+                            <span class="badge bg-light text-dark fs-6 px-3 py-2 shadow-sm">
+                                Today: ₹@todayRevenue.ToString("N0")
+                            </span>
+                        </div>
+                        <div class="col-auto">
+                            <span class="badge bg-success text-white fs-6 px-3 py-2 shadow-sm">
+                                Total: ₹@totalRevenue.ToString("N0")
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid py-4">
+        <!-- Main Stats Grid -->
+        <div class="row g-4 mb-5">
+            <!-- Staff -->
+            <div class="col-xl-3 col-lg-6 col-md-6">
+                <div class="card stat-card shadow-lg hover-lift border-0 overflow-hidden">
+                    <div class="card-body p-4">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <h5 class="text-muted mb-2">Staff Members</h5>
+                                <h2 class="display-5 fw-bold animate-number">@ViewBag.TotalStaff</h2>
+                                <p class="text-success mb-0 fs-6">
+                                    <i class="fas fa-users me-1"></i>Active Staff
+                                </p>
+                            </div>
+                            <div class="col-auto">
+                                <div class="stat-icon bg-gradient-info shadow-lg">
+                                    <i class="fas fa-user-tie text-white fs-2"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Customers -->
+            <div class="col-xl-3 col-lg-6 col-md-6">
+                <div class="card stat-card shadow-lg hover-lift border-0 overflow-hidden">
+                    <div class="card-body p-4">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <h5 class="text-muted mb-2">Customers</h5>
+                                <h2 class="display-5 fw-bold animate-number">@ViewBag.TotalCustomers</h2>
+                                <p class="text-primary mb-0 fs-6">
+                                    <i class="fas fa-user-friends me-1"></i>Total Visitors
+                                </p>
+                            </div>
+                            <div class="col-auto">
+                                <div class="stat-icon bg-gradient-success shadow-lg">
+                                    <i class="fas fa-users text-white fs-2"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Menu Items -->
+            <div class="col-xl-3 col-lg-6 col-md-6">
+                <div class="card stat-card shadow-lg hover-lift border-0 overflow-hidden">
+                    <div class="card-body p-4">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <h5 class="text-muted mb-2">Menu Items</h5>
+                                <h2 class="display-5 fw-bold animate-number">@ViewBag.TotalMenuItems</h2>
+                                <p class="text-warning mb-0 fs-6">
+                                    <i class="fas fa-utensils me-1"></i>@ViewBag.AvailableItems available
+                                </p>
+                            </div>
+                            <div class="col-auto">
+                                <div class="stat-icon bg-gradient-warning shadow-lg">
+                                    <i class="fas fa-hamburger text-white fs-2"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Orders -->
+            <div class="col-xl-3 col-lg-6 col-md-6">
+                <div class="card stat-card shadow-lg hover-lift border-0 overflow-hidden">
+                    <div class="card-body p-4">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <h5 class="text-muted mb-2">Total Orders</h5>
+                                <h2 class="display-5 fw-bold animate-number">@ViewBag.TotalOrders</h2>
+                                <p class="text-success mb-0 fs-6">
+                                    <i class="fas fa-shopping-cart me-1"></i>@ViewBag.TodayOrders today
+                                </p>
+                            </div>
+                            <div class="col-auto">
+                                <div class="stat-icon bg-gradient-danger shadow-lg">
+                                    <i class="fas fa-receipt text-white fs-2"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Live Stats & Charts -->
+        <div class="row g-4">
+            <!-- Revenue Chart -->
+            <div class="col-xl-8">
+                <div class="card shadow-xl border-0 overflow-hidden">
+                    <div class="card-header bg-white border-0 pb-0">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-chart-line me-2 text-primary"></i>
+                            Revenue - Last 6 Months
+                        </h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <canvas id="revenueChart" height="350"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live Operations Panel -->
+            <div class="col-xl-4">
+                <div class="row g-4 h-100">
+                    <!-- Tables Status -->
+                    <div class="col-12">
+                        <div class="card shadow-xl border-0 h-100">
+                            <div class="card-header bg-white border-0 pb-0">
+                                <h6 class="card-title mb-0">
+                                    <i class="fas fa-table me-2 text-success"></i>
+                                    Table Status
+                                </h6>
+                            </div>
+                            <div class="card-body py-4">
+                                <div class="row text-center">
+                                    <div class="col-4">
+                                        <div class="p-2">
+                                            <h3 class="text-success mb-1">@ViewBag.ActiveTables</h3>
+                                            <small class="text-muted">Active</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="p-2">
+                                            <h3 class="text-warning mb-1">@ViewBag.ReservedTables</h3>
+                                            <small class="text-muted">Reserved</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="p-2">
+                                            <h3 class="text-primary mb-1">@totalTables</h3>
+                                            <small class="text-muted">Total</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Operations -->
+                    <div class="col-12">
+                        <div class="card shadow-xl border-0 h-100">
+                            <div class="card-header bg-white border-0 pb-0">
+                                <h6 class="card-title mb-0">
+                                    <i class="fas fa-bolt me-2 text-warning"></i>
+                                    Live Operations
+                                </h6>
+                            </div>
+                            <div class="card-body py-3">
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between align-items-center py-2">
+                                        <span class="text-muted small">Pending Orders</span>
+                                        <span class="badge bg-danger">@pendingOrders</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center py-2">
+                                        <span class="text-muted small">Preparing</span>
+                                        <span class="badge bg-warning">@preparingOrders</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center py-2 border-top pt-2">
+                                        <span class="text-muted small">Pending Reservations</span>
+                                        <span class="badge bg-info">@ViewBag.PendingReservations</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Stats Row -->
+        <div class="row g-4 mt-4">
+            <!-- Recent Orders -->
+            <div class="col-lg-6">
+                <div class="card shadow-xl border-0">
+                    <div class="card-header bg-white border-0 pb-0">
+                        <h6 class="card-title mb-0">
+                            <i class="fas fa-clock me-2 text-info"></i>
+                            Recent Orders
+                        </h6>
+                    </div>
+                    <div class="card-body py-3">
+                        @if (recentOrders.Any())
+                        {
+                            @foreach (var order in recentOrders)
+                            {
+                                <div class="d-flex justify-content-between align-items-center py-3 border-bottom">
+                                    <div>
+                                        <h6 class="mb-1">Order #@order.OrderId</h6>
+                                        <small class="text-muted">
+                                            @order.Customer?.Name ?? "Guest" • Table #@order.TableId
+                                        </small>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="h5 fw-bold text-primary">₹@(order.TotalAmount?.ToString("N0") ?? "0")</div>
+                                        <span class="badge @(order.OrderStatus == "Pending" ? "bg-danger" : 
+                                            (order.OrderStatus == "Preparing" ? "bg-warning" : "bg-success"))">
+                                            @order.OrderStatus
+                                        </span>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="text-center py-5">
+                                <i class="fas fa-receipt fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">No recent orders</h5>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="col-lg-6">
+                <div class="card shadow-xl border-0">
+                    <div class="card-header bg-white border-0 pb-0">
+                        <h6 class="card-title mb-0">
+                            <i class="fas fa-history me-2 text-secondary"></i>
+                            Recent Activity
+                        </h6>
+                    </div>
+                    <div class="card-body py-3">
+                        @if (recentActivity.Any())
+                        {
+                            @foreach (var activity in recentActivity)
+                            {
+                                <div class="d-flex align-items-center py-2">
+                                    <div class="flex-shrink-0">
+                                        <div class="avatar bg-light rounded-circle p-2">
+                                            <i class="fas fa-user text-muted fs-6"></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <div class="small">@activity.Action - @activity.Entity</div>
+                                        <div class="text-muted small">@activity.CreatedAt?.ToString("MMM dd, HH:mm")</div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+                                
+            </div>
+
+            <!-- Feedback Stats -->
+            <div class="col-lg-6">
+                <div class="card shadow-xl border-0">
+                    <div class="card-header bg-white border-0 pb-0">
+                        <h6 class="card-title mb-0">
+                            <i class="fas fa-star me-2 text-warning"></i>
+                            Customer Feedback
+                        </h6>
+                    </div>
+                    <div class="card-body py-4 text-center">
+                        <div class="mb-4">
+                            <div class="h2 fw-bold text-warning mb-2">@avgRating.ToString("F1")</div>
+                            <div class="text-muted small">Average Rating</div>
+                        </div>
+                        <div class="h5 fw-bold mb-2">@totalFeedback</div>
+                        <div class="text-muted small">Total Reviews</div>
+                        <div class="progress mt-3" style="height: 8px;">
+                            <div class="progress-bar bg-warning" style="width: @(Math.Min(avgRating * 10, 100))%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            
+            
+        </div>
+    </div>
+</div>
+
+<!-- Styles -->
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        --warning-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --info-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --danger-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    }
+
+    .bg-gradient-primary { background: var(--primary-gradient) !important; }
+    .bg-gradient-success { background: var(--success-gradient) !important; }
+    .bg-gradient-warning { background: var(--warning-gradient) !important; }
+    .bg-gradient-info { background: var(--info-gradient) !important; }
+    .bg-gradient-danger { background: var(--danger-gradient) !important; }
+
+    body { background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); min-height: 100vh; }
+    .dashboard-wrapper { min-height: 100vh; }
+
+    .page-header {
+        margin: -1rem -1rem 2rem -1rem;
+        border-radius: 0 0 2rem 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .stat-card {
+        background: rgba(255,255,255,0.95);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.2);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .stat-card:hover {
+        transform: translateY(-12px) scale(1.02);
+        box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+    }
+
+    .stat-icon {
+        width: 70px; height: 70px;
+        border-radius: 20px;
+        display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        transition: transform 0.3s ease;
+    }
+
+    .stat-card:hover .stat-icon { transform: scale(1.1) rotate(5deg); }
+
+    .card-number {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .shadow-xl { box-shadow: 0 20px 60px rgba(0,0,0,0.1) !important; }
+    .hover-lift { transition: all 0.3s ease; }
+    .hover-lift:hover { transform: translateY(-5px); }
+
+    .avatar { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; }
+</style>
+
+<!-- Scripts -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    // Animate numbers
+    function animateValue(id, start, end, duration) {
+        let startTimestamp = null;
+        const step = (timestamp) => {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+            document.getElementById(id).innerHTML = Math.floor(progress * (end - start) + start);
+            if (progress < 1) window.requestAnimationFrame(step);
+        };
+        window.requestAnimationFrame(step);
+    }
+
+    // Revenue Chart with real data
+    document.addEventListener('DOMContentLoaded', function() {
+        const monthlyData = @Html.Raw(Json.Serialize(monthlyRevenue.Select(m => new {
+            label = $"{new DateTime(m.Year, m.Month, 1):MMM yy}",
+            data = m.Revenue
+        })));
+
+        const ctx = document.getElementById('revenueChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: monthlyData.map(m => m.label),
+                datasets: [{
+                    label: 'Revenue (₹)',
+                    data: monthlyData.map(m => m.data),
+                    borderColor: '#667eea',
+                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                    borderWidth: 4,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#667eea',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 3,
+                    pointRadius: 8,
+                    pointHoverRadius: 12
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { 
+                            callback: v => '₹' + v.toLocaleString(),
+                            color: '#6c757d'
+                        },
+                        grid: { color: 'rgba(0,0,0,0.05)' }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#6c757d' }
+                    }
+                },
+                animation: {
+                    duration: 2000,
+                    easing: 'easeInOutQuart'
+                }
+            }
+        });
+
+        // Animate numbers
+        setTimeout(() => {
+            document.querySelectorAll('.animate-number').forEach(el => {
+                const final = parseInt(el.textContent);
+                animateValue(el.id || 'counter', 0, final, 2000);
+            });
+        }, 500);
+    });
+</script>

@@ -1,0 +1,85 @@
+@{
+    ViewData["Title"] = "Feedback";
+}
+@model IEnumerable<cafe.Models.Feedback>
+@{
+    ViewData["Title"] = "Customer Feedback";
+}
+
+<div class="container-fluid py-5 bg-gradient-feedback" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); min-height: 100vh;">
+    <!-- Rating Stats -->
+    <div class="row mb-6 g-4">
+        @{
+    var totalFeedback = Model.Count();
+    var avgRatingDouble = Model.Any() ? Model.Average(f => (double)f.Rating) : 0.0;
+    var avgRating = Math.Round(avgRatingDouble, 1);
+    var ratingCounts = Model.GroupBy(f => f.Rating).ToDictionary(g => g.Key, g => g.Count());
+}
+        <div class="col-lg-3 col-md-6 ">
+            <div class="card border-0 shadow-xl h-100 text-center rounded-5 bg-white bg-opacity-90 backdrop-blur">
+                <div class="card-body py-5 px-3">
+                    <div class="mb-4">
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            <i class="fas fa-star fa-2x @(i <= avgRating ? "text-warning" : "text-muted")"></i>
+                        }
+                    </div>
+                    <h2 class="display-4 fw-bold text-warning mb-2">@avgRating</h2>
+                    <p class="text-muted fs-5 mb-0">Average Rating</p>
+                    <div class="mt-3">
+                        <small class="text-success fw-bold">(@Model.Count() reviews)</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+<br />
+    <!-- Feedback Cards -->
+    <div class="row g-4">
+        @foreach (var item in Model.OrderByDescending(f => f.CreatedAt).Take(12))
+        {
+            <div class="col-xl-4 col-lg-6 col-md-6">
+                <div class="card border-0 shadow-xl rounded-4 overflow-hidden h-100 hover-lift animate__fadeInUp" style="animation-delay: @(0.1 * (Model.ToList().IndexOf(item) % 6))s;">
+                    <div class="card-body p-5 position-relative">
+                        <!-- Stars -->
+                        <div class="mb-4">
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                <i class="fas fa-star @(i <= item.Rating ? "text-warning" : "text-muted") fa-lg me-1"></i>
+                            }
+                        </div>
+                        
+                        <!-- Content -->
+                        <blockquote class="mb-4">
+                            <p class="fs-5 lh-lg text-dark">"@item.Comments"</p>
+                        </blockquote>
+                        
+                        <!-- Customer Info -->
+                        <div class="d-flex align-items-center">
+                            <div class="flex-shrink-0">
+                                <div class="avatar bg-gradient-primary text-white rounded-circle d-flex align-items-center justify-content-center" 
+                                     style="width: 50px; height: 50px; font-size: 1.2rem; font-weight: bold;">
+                                    @item.Customer?.Name[0]
+                                </div>
+                            </div>
+                            <div class="ms-3">
+                                <h6 class="mb-1 fw-bold">@item.Customer?.Name</h6>
+                                <small class="text-muted">Order #@item.OrderId • @(item.CreatedAt?.ToString("MMM dd") ?? "N/A")</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .bg-gradient-feedback { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important; }
+    .shadow-xl { box-shadow: 0 20px 40px -10px rgba(0,0,0,0.15) !important; }
+    .hover-lift { transition: all 0.3s ease; }
+    .hover-lift:hover { transform: translateY(-10px); box-shadow: 0 30px 60px -15px rgba(0,0,0,0.2) !important; }
+    .backdrop-blur { backdrop-filter: blur(10px); }
+    .avatar { font-size: 1.1rem; }
+</style>

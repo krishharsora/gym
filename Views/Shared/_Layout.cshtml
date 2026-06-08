@@ -1,0 +1,250 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+
+@{
+    var role = HttpContextAccessor.HttpContext.Session.GetString("role");
+    var name = Context.Session.GetString("name");
+}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"] - CafeXpert</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" rel="stylesheet">
+
+    <style>
+                    :root {
+                        --primary-color: #d4a574;
+                        --secondary-color: #f8f5f0;
+                        --dark-color: #2c2c2c;
+                    }
+
+                    body {
+                        font-family: 'Poppins', sans-serif;
+                        line-height: 1.6;
+                        color: var(--dark-color);
+                    }
+
+                    .navbar-brand {
+                        font-weight: 700;
+                        font-size: 1.8rem;
+                        color: var(--primary-color) !important;
+                    }
+
+                    .btn-primary-custom {
+                        background: linear-gradient(45deg, var(--primary-color), #c89666);
+                        border: none;
+                        padding: 10px 30px;
+                        font-weight: 600;
+                        border-radius: 50px;
+                    }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-coffee me-2"></i>CafeXpert
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+
+                    @if (role == "Admin")
+                    {
+                        <li class="nav-item"><a class="nav-link" href="/Admin/Dashboard">Dashboard</a></li>
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Staff</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="/Admin/AddStaff">Add Staff</a></li>
+                                <li><a class="dropdown-item" href="/Admin/StaffList">Staff List</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Menu</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="/Admin/Categories">Categories</a></li>
+                                <li><a class="dropdown-item" href="/Admin/MenuItems">Menu Items</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="nav-item"><a class="nav-link" href="/Admin/TableList">Tables</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/Admin/Reservations">Reservations</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/Admin/Orders">Orders</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/Admin/Payments">Payments</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/Admin/Feedback">Feedback</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/Admin/Reports">Reports</a></li>
+
+                    }
+
+                    @if (role == "Customer")
+                    {
+                        <ul class="navbar-nav me-auto">
+                            <li class="nav-item">
+                                <a class="nav-link" href="/Customer/Dashboard">
+                                    <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/Customer/Menu">
+                                    <i class="fas fa-utensils me-1"></i>Menu
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/Customer/Cart">
+                                    <i class="fas fa-shopping-cart me-1"></i>Cart
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/Customer/Orders">
+                                    <i class="fas fa-list me-1"></i>Orders
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/Customer/Reservation">
+                                    <i class="fas fa-calendar me-1"></i>Reserve
+                                </a>
+                            </li>
+                        </ul>
+                        <ul class="navbar-nav">
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-user me-1"></i>Account
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="/Customer/Feedback"><i class="fas fa-star me-2"></i>Feedback</a></li>
+                                    <li>
+                                        <hr class="dropdown-divider">
+                                    </li>
+                                    <li><a class="dropdown-item text-danger" href="/Account/Logout"><i
+                                        class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+
+                        }
+
+                        @if (role == "Kitchen")
+                        {
+                            <li class="nav-item"><a class="nav-link" href="/Kitchen/Dashboard">Dashboard</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/Kitchen/NewOrders">New Orders</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/Kitchen/Preparing">Preparing Orders</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/Kitchen/Ready">Ready Orders</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/Kitchen/Completed">Completed Orders</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/Kitchen/History">Order History</a></li>
+
+                        }
+
+                        @if (role == "Cashier")
+                        {
+                            <li class="nav-item"><a class="nav-link" href="/Cashier/Dashboard">Dashboard</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/Cashier/PendingBills">Pending Bills</a></li>
+                           
+                            <li class="nav-item"><a class="nav-link" href="/Cashier/Payments">Payments</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/Cashier/CompletedPayments">Completed Payments</a>
+                            </li>
+                            <li class="nav-item"><a class="nav-link" href="/Cashier/DailySales">Daily Sales</a></li>
+
+                        }
+
+                        @if (role == "Manager")
+                        {
+                            <li class="nav-item"><a class="nav-link" href="/Manager/Dashboard">Dashboard</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/Manager/Orders">Orders Monitoring</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/Manager/TableStatus">Table Status</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/Manager/Reservations">Reservations</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/Manager/SalesReports">Sales Reports</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/Manager/Feedback">Customer Feedback</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/Manager/StaffActivity">Staff Activity</a></li>
+
+                        }
+                        @if (HttpContextAccessor.HttpContext.Session.GetString("user_id") != null)
+                        {
+
+                            <li class="nav-item">
+                                <a class="nav-link" href="/Profile/index">
+                                    <i class="bi bi-person-circle"></i> @name
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link text-danger" href="/Account/Logout">
+                                    <i class="bi bi-box-arrow-right"></i> Logout
+                                </a>
+                            </li>
+
+                        }
+
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+
+        <!-- PAGE CONTENT -->
+        <div style="margin-top:80px;">
+            @RenderBody()
+        </div>
+
+
+        <!-- FOOTER -->
+        <footer class="bg-dark text-white py-5 mt-5">
+            <div class="container">
+
+                <div class="row">
+
+                    <div class="col-lg-4">
+                        <h5><i class="fas fa-coffee me-2 text-warning"></i>CafeXpert</h5>
+                        <p>Smart cafe management system for modern restaurants.</p>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <h6>Quick Links</h6>
+                        <ul class="list-unstyled">
+                            <li><a href="/" class="text-white-50 text-decoration-none">Home</a></li>
+                            <li><a href="/Home/About" class="text-white-50 text-decoration-none">About</a></li>
+                            <li><a href="/Home/Features" class="text-white-50 text-decoration-none">Features</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <h6>Contact</h6>
+                        <p><i class="fas fa-phone me-2"></i>+91 98765 43210</p>
+                        <p><i class="fas fa-envelope me-2"></i>info@cafexpert.com</p>
+                    </div>
+
+                </div>
+
+                <hr>
+
+                <div class="text-center">
+                    <p>© 2024 CafeXpert. All Rights Reserved.</p>
+                </div>
+
+            </div>
+        </footer>
+
+
+        <!-- SCRIPTS -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+        @RenderSection("Scripts", required: false)
+
+    </body>
+
+</html>

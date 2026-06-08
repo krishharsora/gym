@@ -1,0 +1,252 @@
+@{
+    ViewData["Title"] = "CompletedPayments";
+}
+@model List<Payment>
+@{
+    ViewData["Title"] = "Completed Payments";
+}
+
+<div class="completed-container">
+    <style>
+            .completed-container {
+                font-family: 'Segoe UI', sans-serif;
+                background: linear-gradient(135deg, #d299c2 0%, #fef9d7 100%);
+                min-height: 100vh;
+                padding: 20px;
+            }
+
+            .filter-section {
+                background: white;
+                border-radius: 15px;
+                padding: 25px;
+                margin-bottom: 30px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            }
+
+            .payment-item {
+                background: #f8f9fa;
+                border-radius: 12px;
+                padding: 20px;
+                margin-bottom: 15px;
+                border-left: 5px solid #28a745;
+                transition: all 0.3s;
+            }
+
+            .payment-item:hover {
+                transform: translateX(5px);
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            }
+
+            .method-badge {
+                padding: 6px 12px;
+                border-radius: 20px;
+                font-size: 0.85rem;
+                font-weight: bold;
+            }
+
+            .method-cash {
+                background: #fff3cd;
+                color: #856404;
+            }
+
+            .method-upi {
+                background: #d1ecf1;
+                color: #0c5460;
+            }
+
+            .amount-success {
+                font-size: 1.5rem;
+                font-weight: bold;
+                color: #28a745;
+            }
+    </style>
+
+    <div class="container">
+        <div class="filter-section">
+            <div class="row align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">From Date</label>
+                    <input type="date" class="form-control" id="fromDate" onchange="filterPayments()"
+                           value="@DateTime.Today.ToString("yyyy-MM-dd")">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">To Date</label>
+                    <input type="date" class="form-control" id="toDate" onchange="filterPayments()"
+                           value="@DateTime.Today.ToString("yyyy-MM-dd")">
+                </div>
+                <div class="col-md-2">
+                    <button onclick="exportCSV()" class="btn btn-success w-100">
+                        <i class="fas fa-file-csv me-2"></i>CSV
+                    </button>
+                </div>
+                <div class="col-md-2">
+                    <button onclick="exportPDF()" class="btn btn-danger w-100">
+                        <i class="fas fa-file-pdf me-2"></i>PDF
+                    </button>
+                </div>
+                <div class="col-md-2">
+                    <a href="/Cashier/Dashboard" class="btn btn-outline-primary w-100">
+                        <i class="fas fa-home me-2"></i>Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <h1 class="mb-4"><i class="fas fa-check-circle text-success me-3"></i>Completed Payments (@Model.Count)</h1>
+
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5">
+                <i class="fas fa-inbox fa-5x text-muted mb-4"></i>
+                <h3>No completed payments</h3>
+            </div>
+        }
+        else
+        {
+            <div id="paymentsList">
+                @foreach (var payment in Model)
+                {
+                    <div class="payment-item">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h5>Payment #@payment.PaymentId</h5>
+                                <small class="text-muted">@(payment.PaidAt?.ToString("dd/MM/yyyy hh:mm tt") ?? "")</small>
+                            </div>
+                            <div class="text-end">
+                                <span class="method-badge method-@(payment.PaymentMethod?.ToLower() == "cash" ? "cash" : "upi")">
+                                    @payment.PaymentMethod
+                                </span>
+                                <div class="amount-success mt-2">₹@(payment.Amount?.ToString("F2") ?? "0.00")</div>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <small><strong>Customer:</strong> @(payment.Order?.Customer?.Name ?? "N/A")</small><br>
+                                <small><strong>Table:</strong> Table @(payment.Order?.Table?.TableNumber)</small>
+                            </div>
+                            <div class="col-md-6 text-end">
+                                <small><strong>Order:</strong> #@payment.Order?.OrderId</small>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
+    <!-- ADD THIS SCRIPT at bottom of CompletedPayments.cshtml -->
+    <script>
+    // ✅ Use the cycle-safe JSON from ViewBag
+    let allPayments = @Html.Raw(ViewBag.SafePaymentsJson ?? "[]");
+
+    function filterPayments() {
+        const fromDate = new Date(document.getElementById('fromDate').value + 'T00:00:00');
+        const toDate = new Date(document.getElementById('toDate').value + 'T23:59:59');
+
+        const filtered = allPayments.filter(p => {
+            const paidAt = new Date(p.paidAt);
+            return paidAt >= fromDate && paidAt <= toDate;
+        });
+
+        displayPayments(filtered);
+    }
+
+    function displayPayments(payments) {
+        const container = document.getElementById('paymentsList');
+        container.innerHTML = '';
+
+        if (payments.length === 0) {
+            container.innerHTML = `
+                <div class="text-center py-5">
+                    <i class="fas fa-search fa-5x text-muted mb-4"></i>
+                    <h3>No payments found</h3>
+                    <p class="text-muted">Try adjusting your date range</p>
+                </div>
+            `;
+            return;
+        }
+
+        payments.forEach(payment => {
+            const div = document.createElement('div');
+            div.className = 'payment-item';
+            div.innerHTML = `
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h5>Payment #${payment.paymentId}</h5>
+                        <small class="text-muted">${new Date(payment.paidAt).toLocaleString()}</small>
+                    </div>
+                    <div class="text-end">
+                        <span class="method-badge method-${payment.paymentMethod?.toLowerCase() === 'cash' ? 'cash' : 'upi'}">
+                            ${payment.paymentMethod}
+                        </span>
+                        <div class="amount-success mt-2">₹${parseFloat(payment.amount).toFixed(2)}</div>
+                    </div>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-md-6">
+                        <small><strong>Customer:</strong> ${payment.customerName || 'N/A'}</small><br>
+                        <small><strong>Table:</strong> Table ${payment.tableNumber || 'N/A'}</small>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <small><strong>Order:</strong> #${payment.orderId}</small>
+                    </div>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    function exportCSV() {
+        const fromDate = document.getElementById('fromDate').value;
+        const toDate = document.getElementById('toDate').value;
+
+        const csvContent = [
+            ['Payment ID', 'Order ID', 'Customer', 'Table', 'Amount', 'Method', 'Paid At'],
+            ...allPayments.map(p => [
+                p.paymentId,
+                p.orderId || '',
+                p.customerName || '',
+                `Table ${p.tableNumber || ''}`,
+                `₹${parseFloat(p.amount).toFixed(2)}`,
+                p.paymentMethod,
+                new Date(p.paidAt).toLocaleString()
+            ])
+        ].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `completed-payments-${fromDate}_to_${toDate}.csv`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+    }
+
+    function exportPDF() {
+        window.print();
+    }
+
+    // Initialize filter on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        filterPayments();
+    });
+</script>
+
+    <!-- ADD PRINT STYLES for PDF export -->
+    <style media="print">
+            .filter-section {
+                display: none;
+            }
+
+            .payment-item {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+
+            body {
+                font-size: 12px;
+            }
+    </style>
+</div>

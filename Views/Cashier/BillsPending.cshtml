@@ -1,0 +1,40 @@
+@model List<Order>
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Pending Bills <span class="badge bg-warning">@Model.Count</span></h2>
+        <a href="/Cashier/Dashboard" class="btn btn-outline-primary">← Dashboard</a>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5">
+            <i class="fas fa-receipt fa-5x text-muted mb-4"></i>
+            <h4>No pending bills</h4>
+            <p class="text-muted">All orders are up to date!</p>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var order in Model)
+            {
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">Order #@order.OrderId</h5>
+                            <p class="card-text">
+                                <strong>Customer:</strong> @order.Customer?.Name<br>
+                                <strong>Table:</strong> @order.Table?.TableNumber<br>
+                                <strong>Total:</strong> ₹@order.TotalAmount?.ToString("F2")
+                            </p>
+                            <a href="/Cashier/BillsGenerate?orderId=@order.OrderId" 
+                               class="btn btn-primary w-100">
+                                Generate Bill
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

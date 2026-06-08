@@ -1,0 +1,74 @@
+@model cafe.Models.CafeTable
+@{
+    ViewData["Title"] = "Edit Table";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-xl-6">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-header bg-gradient-warning text-white py-4">
+                    <h3 class="mb-0">
+                        <i class="fas fa-edit me-2"></i>
+                        Edit Table #@Model.TableNumber
+                    </h3>
+                </div>
+                <div class="card-body p-5">
+                    <form asp-action="EditTable" method="post">
+                        <input type="hidden" asp-for="TableId" />
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label asp-for="TableNumber" class="form-label fw-bold">Table Number <span class="text-danger">*</span></label>
+                                <input asp-for="TableNumber" class="form-control form-control-lg shadow-sm" />
+                                <span asp-validation-for="TableNumber" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label asp-for="Capacity" class="form-label fw-bold">Capacity <span class="text-danger">*</span></label>
+                                <input asp-for="Capacity" type="number" min="1" max="20" class="form-control form-control-lg shadow-sm" />
+                                <span asp-validation-for="Capacity" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="QrCodeUrl" class="form-label fw-bold">QR Code URL (Optional)</label>
+                            <input asp-for="QrCodeUrl" class="form-control form-control-lg shadow-sm" 
+                                   placeholder="https://your-qr-domain.com/table/123" />
+                            <div class="form-text">Enter QR code URL for table ordering/reservation</div>
+                            @if (!string.IsNullOrEmpty(Model.QrCodeUrl))
+                            {
+                                <div class="mt-2">
+                                    <a href="@Model.QrCodeUrl" target="_blank" class="btn btn-sm btn-outline-info">
+                                        <i class="fas fa-external-link-alt me-1"></i>View Current QR
+                                    </a>
+                                </div>
+                            }
+                            <span asp-validation-for="QrCodeUrl" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label asp-for="Status" class="form-label fw-bold">Status <span class="text-danger">*</span></label>
+                            <select asp-for="Status" class="form-select form-select-lg shadow-sm">
+                                <option value="Available">Available</option>
+                                <option value="Occupied">Occupied</option>
+                                <option value="Reserved">Reserved</option>
+                                <option value="Maintenance">Maintenance</option>
+                            </select>
+                            <span asp-validation-for="Status" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-flex gap-3">
+                            <a asp-action="TableList" class="btn btn-outline-secondary btn-lg flex-fill">
+                                <i class="fas fa-arrow-left me-2"></i>Back to List
+                            </a>
+                            <button type="submit" class="btn btn-warning btn-lg flex-fill shadow-sm">
+                                <i class="fas fa-save me-2"></i>Update Table
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

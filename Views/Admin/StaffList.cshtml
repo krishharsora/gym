@@ -1,0 +1,48 @@
+@model IEnumerable<cafe.Models.User>
+
+@{
+    ViewData["Title"] = "Staff List";
+}
+
+<h2>Staff List</h2>
+
+<a href="/Admin/AddStaff" class="btn btn-primary mb-3">Add Staff</a>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.UserId</td>
+                <td>@item.FullName</td>
+                <td>@item.Email</td>
+                <td>@item.Phone</td>
+                <td>@item.Role</td>
+                <td>
+                   @(item.Status ? "Active" : "Inactive")
+                </td>
+                <td>
+                    <a href="/Admin/EditStaff/@item.UserId" class="btn btn-warning btn-sm">Edit</a>
+                    <a href="/Admin/DeleteStaff/@item.UserId"
+                       class="btn btn-danger btn-sm"
+                       >
+                        Delete
+                    </a>
+                    
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

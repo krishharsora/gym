@@ -1,0 +1,237 @@
+
+@model CustomerFeedbackViewModel
+@{
+    ViewData["Title"] = "Feedback & Reviews";
+    
+}
+<style>
+.star-rating-input {
+    transition: all 0.2s ease;
+}
+
+.star-clickable {
+    transition: all 0.2s ease;
+    color: #ddd;
+}
+
+.star-clickable:hover {
+    transform: scale(1.2);
+}
+
+.star-rating-input.animate__shakeX {
+    animation: shake 0.5s;
+}
+
+@@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.rating-text {
+    font-style: italic;
+}
+</style>
+<div class="container-fluid py-4">
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="h3 mb-0 text-primary fw-bold">
+                    <i class="fas fa-star me-2"></i>Your Feedback
+                </h2>
+                <a href="/Customer/Dashboard" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Recent Feedbacks -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-light border-0">
+                    <h5 class="card-title mb-0 fw-bold">
+                        <i class="fas fa-list me-2 text-warning"></i>Your Recent Reviews
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.RecentFeedbacks.Any())
+                    {
+                        @foreach (var feedback in Model.RecentFeedbacks)
+                        {
+                            <div class="feedback-item p-4 border-bottom">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="star-rating me-3">
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            <i class="fas fa-star @(i <= feedback.Rating ? "text-warning" : "far text-muted")"></i>
+                                        }
+                                    </div>
+                                    <div>
+                                        <small class="text-muted">@feedback.CreatedAt?.ToString("MMM dd, hh:mm tt")</small>
+                                    </div>
+                                </div>
+                                @if (!string.IsNullOrEmpty(feedback.Comments))
+                                {
+                                    <p class="mb-0 fw-medium">@feedback.Comments</p>
+                                }
+                                @if (!string.IsNullOrEmpty(feedback.OrderId.ToString()))
+                                {
+                                    <small class="badge bg-info">Order #@feedback.OrderId</small>
+                                }
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-star fa-4x text-muted mb-3 opacity-50"></i>
+                            <h5 class="text-muted">No feedback yet</h5>
+                            <p class="text-muted">Share your experience with us!</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit New Feedback -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm sticky-top" style="top: 100px;">
+                <div class="card-header bg-gradient-primary text-white">
+                    <h6 class="mb-0 fw-bold">
+                        <i class="fas fa-edit me-2"></i>Share Your Experience
+                    </h6>
+                </div>
+                <div class="card-body p-4">
+                    <form id="feedbackForm">
+                        <div class="mb-4">
+    <label class="form-label fw-bold small mb-2 d-block text-uppercase">Your Rating ⭐</label>
+    <div class="star-rating-input position-relative" style="font-size: 1.5rem; cursor: pointer;">
+        <i class="far fa-star star-clickable me-1" data-rating="1" title="Poor"></i>
+        <i class="far fa-star star-clickable me-1" data-rating="2" title="Fair"></i>
+        <i class="far fa-star star-clickable me-1" data-rating="3" title="Good"></i>
+        <i class="far fa-star star-clickable me-1" data-rating="4" title="Very Good"></i>
+        <i class="far fa-star star-clickable" data-rating="5" title="Excellent"></i>
+    </div>
+    <input type="hidden" id="feedbackRating" name="Rating" value="0">
+    <div class="rating-text small text-muted mt-1">
+        Click a star to rate (hover to preview)
+    </div>
+</div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Comments (Optional)</label>
+                            <textarea class="form-control" id="feedbackComment" rows="4" 
+                                      placeholder="Tell us about your experience..."></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Order Reference (Optional)</label>
+                            <input type="text" class="form-control form-control-sm" id="orderReference" 
+                                   placeholder="e.g., #12345">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100" id="submitFeedback">
+                            <i class="fas fa-paper-plane me-2"></i>Submit Feedback
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+<script>
+$(document).ready(function() {
+    let currentRating = 0;
+
+    // ⭐ FIXED: Star rating - Mouse hover
+    $('.star-clickable').on('mouseenter', function() {
+        const rating = parseInt($(this).data('rating'));
+        highlightStars(rating);
+    });
+
+    // ⭐ FIXED: Star rating - Click to select
+    $('.star-clickable').on('click', function() {
+        currentRating = parseInt($(this).data('rating'));
+        $('#feedbackRating').val(currentRating);
+        highlightStars(currentRating);
+        console.log('Selected rating:', currentRating); // Debug
+    });
+
+    // ⭐ FIXED: Reset on mouse leave
+    $('.star-rating-input').on('mouseleave', function() {
+        highlightStars(currentRating);
+    });
+
+    // ⭐ FIXED: Highlight stars function
+    function highlightStars(rating) {
+        $('.star-clickable').each(function(index) {
+            if (index < rating) {
+                $(this).removeClass('far text-muted').addClass('fas text-warning');
+            } else {
+                $(this).removeClass('fas text-warning').addClass('far text-muted');
+            }
+        });
+    }
+
+    // ✅ FIXED: Form submission
+    $('#feedbackForm').on('submit', async function(e) {
+        e.preventDefault();
+        
+        // ⭐ FIXED: Validation
+        if (currentRating === 0) {
+            $('.star-rating-input').addClass('animate__shakeX'); // Shake animation
+            setTimeout(() => $('.star-rating-input').removeClass('animate__shakeX'), 500);
+            alert('⚠️ Please select your rating (1-5 stars)');
+            return;
+        }
+
+        const btn = $('#submitFeedback');
+        btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Submitting...');
+
+        const feedbackData = {
+            Rating: currentRating,
+            Comment: $('#feedbackComment').val().trim() || null,
+            OrderId: $('#orderReference').val().trim() || null
+        };
+
+        try {
+            const response = await $.ajax({
+                url: '/Customer/SubmitFeedback',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(feedbackData)
+            });
+
+            if (response.success) {
+                // Success feedback
+                btn.removeClass('btn-primary').addClass('btn-success')
+                   .html('<i class="fas fa-check me-2"></i>Thank You!');
+                
+                // Reset form
+                $('#feedbackForm')[0].reset();
+                currentRating = 0;
+                highlightStars(0);
+                
+                // Reload to show new feedback
+                setTimeout(() => location.reload(), 2000);
+            } else {
+                alert('❌ ' + (response.message || 'Submission failed'));
+            }
+        } catch (error) {
+            console.error('Feedback error:', error);
+            alert('❌ Network error. Please try again.');
+        } finally {
+            btn.prop('disabled', false)
+               .removeClass('btn-success').addClass('btn-primary')
+               .html('<i class="fas fa-paper-plane me-2"></i>Submit Feedback');
+        }
+    });
+});
+</script>
+
+<!-- Animate.css for shake effect (optional) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+}

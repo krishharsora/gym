@@ -1,0 +1,127 @@
+@{
+    ViewData["Title"] = "Index";
+}
+@model cafe.Models.User
+
+<h2 class="mb-4">My Profile</h2>
+
+@if(ViewBag.msg != null)
+{
+<div class="alert alert-success">@ViewBag.msg</div>
+}
+
+@if(ViewBag.passmsg != null)
+{
+<div class="alert alert-info">@ViewBag.passmsg</div>
+}
+
+<div class="row">
+
+<!-- PROFILE CARD -->
+<div class="col-md-4">
+
+<div class="card shadow text-center p-4">
+
+<img src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
+width="120"
+class="mx-auto mb-3">
+
+<h4>@Model.FullName</h4>
+
+<p>@Model.Email</p>
+
+<span class="badge bg-primary">@Model.Role</span>
+
+<p class="mt-2">
+Status:
+<span class="badge bg-success">@Model.Status</span>
+</p>
+
+<button class="btn btn-warning mt-2"
+data-bs-toggle="collapse"
+data-bs-target="#editProfile">
+
+Update Profile
+</button>
+
+<button class="btn btn-danger mt-2"
+data-bs-toggle="collapse"
+data-bs-target="#changePassword">
+
+Change Password
+</button>
+
+</div>
+
+</div>
+
+
+<!-- EDIT PROFILE -->
+<div class="col-md-8">
+
+<div class="collapse mb-3" id="editProfile">
+
+<div class="card shadow p-4">
+
+<h4>Edit Profile</h4>
+
+<form method="post">
+
+<input type="hidden" asp-for="UserId"/>
+
+<div class="mb-3">
+<label>Full Name</label>
+<input asp-for="FullName" class="form-control">
+</div>
+
+<div class="mb-3">
+<label>Email</label>
+<input asp-for="Email" class="form-control">
+</div>
+<div class="mb-3">
+<label>Phone</label>
+<input asp-for="Phone" class="form-control">
+</div>
+<button class="btn btn-success">
+Save Changes
+</button>
+
+</form>
+
+</div>
+
+</div>
+
+
+<!-- CHANGE PASSWORD -->
+<div class="collapse" id="changePassword">
+
+<div class="card shadow p-4">
+
+<h4>Change Password</h4>
+
+<form method="post" action="/Profile/ChangePassword">
+
+<div class="mb-3">
+<label>Old Password</label>
+<input type="password" name="oldPassword" class="form-control" required>
+</div>
+
+<div class="mb-3">
+<label>New Password</label>
+<input type="password" name="newPassword" class="form-control" required>
+</div>
+
+<button class="btn btn-danger">
+Update Password
+</button>
+
+</form>
+
+</div>
+
+</div>
+
+</div>
+
+</div>

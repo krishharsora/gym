@@ -1,0 +1,85 @@
+@{
+    ViewData["Title"] = "PendingBills";
+}
+@model List<Order>
+@{
+    ViewData["Title"] = "Pending Bills";
+}
+
+<div class="bills-container">
+    <style>
+        .bills-container { font-family: 'Segoe UI', sans-serif; background: #f8f9fa; min-height: 100vh; padding: 20px; }
+        .table-container { background: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); overflow: hidden; }
+        .table th { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; padding: 20px; }
+        .table tbody tr:hover { background: #f8f9ff; transform: scale(1.01); transition: all 0.3s; }
+        .status-badge { padding: 8px 16px; border-radius: 25px; font-weight: bold; font-size: 0.9rem; }
+        .status-ready { background: #fff3cd; color: #856404; }
+        .status-served { background: #d1ecf1; color: #0c5460; }
+        .action-btn { border-radius: 25px; padding: 10px 20px; font-weight: bold; margin: 0 5px; }
+        .total-amount { font-size: 1.5rem; font-weight: bold; color: #667eea; }
+    </style>
+
+    <div class="container-fluid">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="fas fa-file-invoice-dollar text-primary me-3"></i>Pending Bills (@Model.Count)</h1>
+            <a href="/Cashier/Dashboard" class="btn btn-outline-secondary"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+        </div>
+
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5">
+                <i class="fas fa-clipboard-list fa-5x text-muted mb-4"></i>
+                <h3>No pending bills</h3>
+                <p class="text-muted">All bills have been processed.</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-container">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Order #</th>
+                            <th>Customer</th>
+                            <th>Table</th>
+                            <th>Items</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var order in Model)
+                        {
+                            <tr>
+                                <td><strong>#@order.OrderId</strong></td>
+                                <td>@(order.Customer?.Name ?? "Walk-in")</td>
+                                <td>Table @(order.Table?.TableNumber)</td>
+                                <td>
+                                    <ul class="mb-0">
+                                        @foreach (var item in order.OrderItems )
+                                        {
+                                            <li>@item.MenuItem?.ItemName (@item.Quantity)</li>
+                                        }
+                                    </ul>
+                                </td>
+                                <td><span class="total-amount">₹@(order.TotalAmount?.ToString("F2") ?? "0.00")</span></td>
+                                <td>
+                                    <span class="status-badge status-@(order.OrderStatus?.ToLower() == "ready" ? "ready" : "served")">
+                                        @order.OrderStatus
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="/Cashier/BillsGenerate?orderId=@order.OrderId" 
+                                       class="btn btn-primary action-btn">
+                                        <i class="fas fa-receipt"></i> Generate Bill
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

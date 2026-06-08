@@ -1,0 +1,177 @@
+@{
+    ViewData["Title"] = "Login";
+}
+@{
+ViewData["Title"] = "Login";
+Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Login - Cafe System</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+
+body{
+height:100vh;
+display:flex;
+align-items:center;
+justify-content:center;
+background:url('/images/p1.jpg');
+background-size:cover;
+background-position:center;
+font-family:'Poppins',sans-serif;
+}
+
+
+/* Glass Login Card */
+
+.login-card{
+
+width:100%;
+max-width:400px;
+
+background:rgba(255,255,255,0.15);
+backdrop-filter:blur(12px);
+
+border:1px solid rgba(255,255,255,0.3);
+
+border-radius:15px;
+
+box-shadow:0 10px 30px rgba(0,0,0,0.3);
+
+padding:30px;
+
+color:rgb(0, 0, 0);
+
+}
+
+
+/* Title */
+
+.login-title{
+text-align:center;
+font-weight:600;
+margin-bottom:20px;
+}
+
+
+/* Input Fields */
+
+.form-control{
+background:rgba(255,255,255,0.2);
+border:none;
+color:white;
+}
+
+.form-control::placeholder{
+color:#000000;
+}
+
+.form-control:focus{
+background:rgba(255,255,255,0.3);
+box-shadow:none;
+}
+
+
+/* Button */
+
+.btn-login{
+background:#3498db;
+border:none;
+font-weight:500;
+}
+
+.btn-login:hover{
+background:#217dbb;
+}
+.a{
+color:black;}
+
+/* Links */
+
+.login-links a{
+color:white;
+text-decoration:none;
+font-size:14px;
+}
+
+.login-links a:hover{
+text-decoration:underline;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="login-card">
+
+<div class="login-title">
+
+<h4>CafeXpert System</h4>
+<p>Login</p>
+
+</div>
+
+<form method="post" asp-controller="Account" asp-action="Login">
+
+<div class="mb-3">
+
+<label>Email</label>
+
+<input type="email" name="email" class="form-control" placeholder="Enter Email" required>
+
+</div>
+
+<div class="mb-3">
+
+<label>Password</label>
+
+<input type="password" name="password" class="form-control" placeholder="Enter Password" required>
+
+</div>
+
+<button type="submit" class="btn btn-login w-100">
+Login
+</button>
+
+</form>
+
+@if(ViewBag.error != null)
+{
+
+<div class="alert alert-danger mt-3">
+@ViewBag.error
+</div>
+}
+
+<hr style="border-color:rgba(255,255,255,0.4)">
+
+<div class="text-center login-links">
+
+<a href="/Account/Register" class="text-black">Create New Account</a>
+
+|
+
+<a href="/Account/ForgotPassword" class="text-black">Forgot Password?</a>
+<br></>
+<a href="/Home" class="text-black">Home</a>
+
+</div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,495 @@
+@{
+    ViewData["Title"] = "Shopping Cart";
+}
+@model cafe.Models.CartViewModel
+
+<div class="container-fluid py-5 bg-light min-vh-100">
+    <div class="row justify-content-center">
+        <div class="col-xl-10 col-lg-11">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-5 p-4 bg-white rounded-4 shadow-lg">
+                <div>
+                    <h1 class="h2 mb-1 fw-bold text-primary">
+                        <i class="fas fa-shopping-cart me-3"></i>Shopping Cart
+                    </h1>
+                    <small class="text-muted">
+                        @Model.CartItems.Count item@(Model.CartItems.Count != 1 ? "s" : "")
+                        - Total: <strong>₹@Model.TotalAmount</strong>
+                    </small>
+                </div>
+                <a href="/Customer/Menu" class="btn btn-outline-primary btn-lg px-4">
+                    <i class="fas fa-plus me-2"></i>Continue Shopping
+                </a>
+            </div>
+
+            @if (!Model.CartItems.Any())
+            {
+                <div class="text-center py-10 bg-white rounded-4 shadow-lg p-8">
+                    <div class="empty-cart-icon mb-4">
+                        <i class="fas fa-shopping-cart fa-6x text-muted opacity-50"></i>
+                    </div>
+                    <h3 class="text-muted mb-3">Your cart is empty</h3>
+                    <p class="lead text-muted mb-5">Looks like you haven't added anything to your cart yet.</p>
+                    <div class="d-grid gap-2 d-md-block">
+                        <a href="/Customer/Menu" class="btn btn-primary btn-lg px-5 me-md-3 mb-2 mb-md-0">
+                            <i class="fas fa-utensils me-2"></i>Explore Menu
+                        </a>
+                        <a href="/Customer/Dashboard" class="btn btn-outline-secondary btn-lg px-5">
+                            <i class="fas fa-home me-2"></i>Back to Dashboard
+                        </a>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <!-- Cart Content -->
+                <div class="row g-4">
+                    <!-- Cart Items List -->
+                    <div class="col-lg-8">
+                        <div class="card border-0 shadow-xl h-100">
+                            <div class="card-header bg-gradient-primary text-white p-4 rounded-top-4">
+                                <h5 class="mb-0 fw-bold">
+                                    <i class="fas fa-list-ul me-2"></i>
+                                    Your Items (@Model.CartItems.Count)
+                                </h5>
+                            </div>
+                            <div class="card-body p-0">
+                                @foreach (var cartItem in Model.CartItems)
+                                {
+                                    <div class="cart-item-row p-4 border-bottom hover-effect" data-item-id="@cartItem.ItemId">
+                                        <div class="row align-items-center g-3">
+                                            <!-- Item Image -->
+                                            <div class="col-md-2 col-3">
+                                                @if (!string.IsNullOrEmpty(cartItem.MenuItem?.ImageUrl))
+                                                {
+                                                    <img src="@cartItem.MenuItem.ImageUrl" 
+                                                         class="img-fluid rounded-3 shadow-sm cart-img" 
+                                                         alt="@cartItem.MenuItem?.ItemName"
+                                                         style="height: 90px; width: 90px; object-fit: cover;">
+                                                }
+                                                else
+                                                {
+                                                    <div class="bg-gradient-light rounded-3 shadow-sm d-flex align-items-center justify-content-center cart-img-placeholder" 
+                                                         style="width: 90px; height: 90px;">
+                                                        <i class="fas fa-utensils text-muted fa-xl"></i>
+                                                    </div>
+                                                }
+                                            </div>
+
+                                            <!-- Item Details -->
+                                            <div class="col-md-4 col-6">
+                                                <h6 class="mb-1 fw-bold text-dark lh-sm">@cartItem.MenuItem?.ItemName</h6>
+                                                @if (cartItem.MenuItem?.Category != null)
+                                                {
+                                                    <span class="badge bg-light text-dark px-2 py-1 small fw-semibold">
+                                                        @cartItem.MenuItem.Category.CategoryName
+                                                    </span>
+                                                }
+                                                <div class="mt-1">
+                                                    <small class="text-muted">₹@(cartItem.MenuItem?.Price ?? 0)</small>
+                                                </div>
+                                            </div>
+
+                                            <!-- Price -->
+                                            <div class="col-md-2 col-sm-3 text-md-center text-sm-end">
+                                                <div class="h6 fw-bold text-primary mb-0">
+                                                    ₹@(cartItem.MenuItem?.Price * cartItem.Quantity ?? 0)
+                                                </div>
+                                                <small class="text-muted">(@cartItem.Quantity × ₹@(cartItem.MenuItem?.Price ?? 0))</small>
+                                            </div>
+
+                                            <!-- Quantity Controls -->
+                                            <div class="col-md-2 col-sm-4">
+                                                <div class="input-group input-group-lg quantity-controls">
+                                                    <button class="btn btn-outline-secondary decrement-btn flex-fill py-2" 
+                                                            data-item-id="@cartItem.ItemId" data-current-qty="@cartItem.Quantity">
+                                                        <i class="fas fa-minus"></i>
+                                                    </button>
+                                                    <input type="text" class="form-control qty-display text-center fw-bold py-2" 
+                                                           value="@cartItem.Quantity" readonly 
+                                                           data-item-id="@cartItem.ItemId" data-current-qty="@cartItem.Quantity">
+                                                    <button class="btn btn-outline-secondary increment-btn flex-fill py-2" 
+                                                            data-item-id="@cartItem.ItemId" data-current-qty="@cartItem.Quantity">
+                                                        <i class="fas fa-plus"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <!-- Remove Button -->
+                                            <div class="col-md-1 col-sm-2 text-end">
+                                                <button class="btn btn-sm btn-outline-danger remove-btn p-2" 
+                                                        data-item-id="@cartItem.ItemId" title="Remove item">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Order Summary -->
+                    <div class="col-lg-4">
+                        <div class="card border-0 shadow-xl sticky-top" style="top: 2rem;">
+                            <div class="card-header bg-gradient-success text-white rounded-top-4 p-4">
+                                <h4 class="mb-0 fw-bold">
+                                    <i class="fas fa-receipt me-2"></i>Order Summary
+                                </h4>
+                            </div>
+                            <div class="card-body p-4">
+                                <!-- Items Summary -->
+                                <div class="d-flex justify-content-between align-items-center py-3 border-bottom">
+                                    <span class="h6 mb-0">Items (@Model.CartItems.Count):</span>
+                                    <span class="h6 mb-0 fw-bold">@Model.CartItems.Sum(x => x.Quantity) items</span>
+                                </div>
+
+                                <!-- Subtotal -->
+                                <div class="d-flex justify-content-between align-items-center py-3 border-bottom">
+                                    <span>Subtotal</span>
+                                    <span class="h5 fw-bold text-primary">₹@Model.TotalAmount</span>
+                                </div>
+
+                                <!-- Tax (10%) -->
+                                @{
+                                    var tax = Model.TotalAmount * 0.10m;
+                                }
+                                <div class="d-flex justify-content-between align-items-center py-3 border-bottom">
+                                    <span>Tax (10%)</span>
+                                    <span>₹@tax</span>
+                                </div>
+
+                                <!-- Total -->
+                                <div class="d-flex justify-content-between align-items-center py-4 border-bottom">
+                                    <span class="h5 fw-bold mb-0">Grand Total</span>
+                                    <span class="h3 fw-bold text-success mb-0">
+                                        ₹@(Model.TotalAmount + tax).ToString("F2")
+                                    </span>
+                                </div>
+
+                                <!-- Table Selection -->
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold small text-uppercase mb-3 d-block">Table Preference</label>
+                                    <select class="form-select form-select-lg" id="tableSelect">
+                                        <option value="">📱 Order & Pay → Collect</option>
+                                        <option value="">🍽️ Dine-in (Assign table)</option>
+                                    </select>
+                                </div>
+
+                                <!-- Action Buttons -->
+                                <div class="d-grid gap-3">
+                                    <button class="btn btn-success btn-lg checkout-btn shadow-lg" id="checkoutBtn">
+                                        <i class="fas fa-credit-card me-2"></i>
+                                        Pay Now ₹@(Model.TotalAmount + tax).ToString("F2")
+                                    </button>
+                                    <button class="btn btn-outline-danger btn-lg clear-cart-btn shadow-sm" id="clearCartBtn">
+                                        <i class="fas fa-trash me-2"></i>Clear Cart
+                                    </button>
+                                </div>
+
+                                <div class="text-center mt-4 pt-3 border-top">
+                                    <small class="text-muted">
+                                        <i class="fas fa-lock me-1 text-success"></i>
+                                        Secure payment • Instant confirmation
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    }
+    .bg-gradient-success {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%) !important;
+    }
+    .bg-gradient-light {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    }
+    
+    .cart-img, .cart-img-placeholder {
+        transition: all 0.3s ease;
+    }
+    .cart-item-row:hover {
+        background: rgba(102, 126, 234, 0.05);
+        border-radius: 12px;
+        margin: 0 -1rem;
+        padding: 1rem;
+        transform: translateY(-2px);
+    }
+    
+    .quantity-controls {
+        max-width: 140px;
+        margin: 0 auto;
+    }
+    
+    .quantity-controls .btn {
+        border-radius: 12px !important;
+        border: 2px solid #dee2e6 !important;
+        transition: all 0.2s ease;
+    }
+    
+    .quantity-controls .btn:hover {
+        border-color: #667eea !important;
+        background: #667eea !important;
+        color: white !important;
+        transform: scale(1.05);
+    }
+    
+    .qty-display {
+        border: 2px solid #dee2e6 !important;
+        font-size: 1.25rem;
+        font-weight: 700;
+        background: white;
+        color: #495057;
+    }
+    
+    .remove-btn {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        transition: all 0.2s ease;
+    }
+    
+    .remove-btn:hover {
+        background: #dc3545 !important;
+        color: white !important;
+        transform: scale(1.1);
+    }
+    
+    .hover-effect {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+</style>
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://js.stripe.com/v3/"></script>
+    <script>
+    $(document).ready(function() {
+        console.log('✅ Cart script loaded - @Model.CartItems.Count items');
+        
+        const stripe = Stripe('pk_test_51TBctuQuyAg2bqwwsEo7CwidoqM4gv47lngP5FJ8ZFLxfWGHalA9HCMjuBR0jNYUL5DSItKAoxey7JKw3Lt7VGxO00g0Y5ydkA');
+
+        // 🔥 REALTIME TOTAL UPDATER (NEW!)
+        function updateOrderSummary() {
+            let subtotal = 0;
+            let itemCount = 0;
+            
+            // Calculate from ALL cart rows
+            $('.cart-item-row').each(function() {
+                const $row = $(this);
+                const qty = parseInt($row.find('.qty-display').val()) || 0;
+                const priceText = $row.find('small:contains("₹")').first().text();
+                const unitPrice = parseFloat(priceText.match(/[\d.]+/)[0]) || 0;
+                subtotal += qty * unitPrice;
+                itemCount += qty;
+            });
+            
+            const tax = subtotal * 0.10;
+            const grandTotal = subtotal + tax;
+            
+            console.log(`📊 Updated: ${itemCount} items, ₹${subtotal.toFixed(2)}, Tax ₹${tax.toFixed(2)}, Total ₹${grandTotal.toFixed(2)}`);
+            
+            // Update ALL summary elements
+            $('.h6.mb-0.fw-bold').text(`${itemCount} items`); // Items count
+            $('.h5.fw-bold.text-primary').text('₹' + subtotal.toFixed(2)); // Subtotal
+            $('span:contains("Tax (10%)")').next().text('₹' + tax.toFixed(2)); // Tax
+            $('.h3.fw-bold.text-success').text('₹' + grandTotal.toFixed(2)); // Grand Total
+            $('.checkout-btn').html(`<i class="fas fa-credit-card me-2"></i>Pay Now ₹${grandTotal.toFixed(2)}`); // Pay button
+        }
+
+        // 🔥 1. UPDATE QUANTITY (IMPROVED)
+        $(document).on('click', '.increment-btn, .decrement-btn', async function(e) {
+            e.preventDefault();
+            const $btn = $(this);
+            const itemId = parseInt($btn.data('item-id'));
+            const $qtyInput = $btn.closest('.quantity-controls').find('.qty-display');
+            let currentQty = parseInt($qtyInput.val()) || 1;
+            
+            const newQty = $btn.hasClass('increment-btn') ? currentQty + 1 : Math.max(1, currentQty - 1);
+            
+            await updateQuantity(itemId, newQty, $qtyInput);
+            updateOrderSummary(); // 🔥 REALTIME UPDATE
+        });
+
+        // Direct quantity input
+        $(document).on('change', '.qty-display', function() {
+            const itemId = parseInt($(this).data('item-id'));
+            let newQty = parseInt($(this).val()) || 1;
+            newQty = Math.max(1, Math.min(99, newQty));
+            $(this).val(newQty);
+            updateQuantity(itemId, newQty, $(this));
+            updateOrderSummary(); // 🔥 REALTIME UPDATE
+        });
+
+        // 🔥 2. REMOVE ITEM (IMPROVED)
+        $(document).on('click', '.remove-btn', async function(e) {
+            e.preventDefault();
+            if (confirm('Remove this item from cart?')) {
+                const itemId = parseInt($(this).data('item-id'));
+                await removeItem(itemId);
+                updateOrderSummary(); // 🔥 REALTIME UPDATE
+            }
+        });
+
+        // 🔥 3. CLEAR CART
+        $('#clearCartBtn').click(async function(e) {
+            e.preventDefault();
+            if (confirm('Clear entire cart? This action cannot be undone.')) {
+                await clearAllItems();
+            }
+        });
+
+        // 🔥 4. PAY NOW (UPDATED WITH DYNAMIC TOTAL)
+        // 🔥 FIXED PAYMENT BUTTON - Replace the entire #checkoutBtn click handler
+// 🔥 FIXED CHECKOUT BUTTON - COMPLETE
+$('#checkoutBtn').click(async function(e) {
+    e.preventDefault();
+    const $btn = $(this);
+    
+    // Calculate totals (your existing code)
+    let subtotal = 0;
+    $('.cart-item-row').each(function() {
+        const qty = parseInt($(this).find('.qty-display').val()) || 0;
+        const priceText = $(this).find('small:contains("₹")').first().text();
+        const unitPriceMatch = priceText.match(/[\d.]+/);
+        const unitPrice = unitPriceMatch ? parseFloat(unitPriceMatch[0]) : 0;
+        subtotal += qty * unitPrice;
+    });
+    
+    const tax = subtotal * 0.10;
+    const grandTotal = subtotal + tax;
+    
+    showLoading($btn, `Creating secure checkout...`);
+    
+    try {
+        const formData = new FormData();
+        formData.append('amount', grandTotal.toFixed(2));
+        
+        const response = await fetch('/Customer/CreateCheckoutSession', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        console.log('✅ Response:', data);
+        
+        if (data.success) {
+            // ✅ Try sessionId first, fallback to redirectUrl
+            if (data.sessionId) {
+                const result = await stripe.redirectToCheckout({ sessionId: data.sessionId });
+                if (result.error) throw new Error(result.error.message);
+            } else if (data.redirectUrl) {
+                window.location.href = data.redirectUrl;
+            } else {
+                throw new Error('No redirect available');
+            }
+        } else {
+            throw new Error(data.message || 'Checkout failed');
+        }
+    } catch (error) {
+        console.error('❌ Error:', error);
+        showToast('Checkout failed: ' + error.message, 'danger');
+    } finally {
+        $btn.prop('disabled', false)
+            .html(`<i class="fas fa-credit-card me-2"></i>Pay Now ₹${grandTotal.toFixed(2)}`);
+    }
+});
+
+       
+        // 🔥 Helper Functions (IMPROVED)
+        async function updateQuantity(itemId, newQty, $input) {
+            try {
+                const response = await $.ajax({
+                    url: '/Customer/UpdateCartItem',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ itemId, quantity: newQty })
+                });
+                
+                if (response.success) {
+                    $input.val(newQty).attr('data-current-qty', newQty);
+                    updateRowSubtotal(itemId);
+                    showToast(response.message || `Updated to ${newQty}`, 'success');
+                } else {
+                    throw new Error(response.message);
+                }
+            } catch (error) {
+                console.error('Update failed:', error);
+                showToast('Failed to update: ' + error.message, 'danger');
+                $input.val($input.data('current-qty') || 1);
+            }
+        }
+
+        async function removeItem(itemId) {
+            try {
+                const response = await $.ajax({
+                    url: '/Customer/RemoveCartItem',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ itemId })
+                });
+                
+                if (response.success) {
+                    $(`.cart-item-row[data-item-id="${itemId}"]`).fadeOut(400, function() {
+                        $(this).remove();
+                        if ($('.cart-item-row').length === 0) {
+                            location.reload();
+                        }
+                    });
+                    showToast('Item removed', 'success');
+                }
+            } catch (error) {
+                showToast('Remove failed', 'danger');
+            }
+        }
+
+        async function clearAllItems() {
+            try {
+                await $.post('/Customer/ClearCart');
+                location.reload();
+            } catch (error) {
+                showToast('Clear failed', 'danger');
+            }
+        }
+
+        function updateRowSubtotal(itemId) {
+            const $row = $(`.cart-item-row[data-item-id="${itemId}"]`);
+            const qty = parseInt($row.find('.qty-display').val());
+            const priceText = $row.find('small:contains("₹")').first().text();
+            const unitPrice = parseFloat(priceText.match(/[\d.]+/)[0]);
+            const subtotal = qty * unitPrice;
+            $row.find('.text-primary').text('₹' + subtotal.toFixed(2));
+            $row.find('small').last().text(`(${qty} × ₹${unitPrice.toFixed(0)})`);
+        }
+
+        function showLoading($el, text) {
+            $el.prop('disabled', true).html(`<i class="fas fa-spinner fa-spin me-2"></i>${text}`);
+        }
+
+        function showToast(message, type = 'success') {
+            const bgClass = type === 'success' ? 'bg-success' : 'bg-danger';
+            const $toast = $(`
+                <div class="position-fixed p-3" style="top: 20px; right: 20px; z-index: 9999">
+                    <div class="alert alert-${bgClass} border-0 shadow-lg fade show" role="alert">
+                        <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle'} me-2"></i>
+                        ${message}
+                        <button type="button" class="ms-2 btn-close btn-close-white float-end" data-bs-dismiss="alert"></button>
+                    </div>
+                </div>
+            `);
+            $('body').append($toast);
+            setTimeout(() => $toast.alert('close'), 4000);
+        }
+
+        // 🔥 INITIALIZE TOTALS
+        updateOrderSummary();
+    });
+    </script>
+}

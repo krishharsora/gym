@@ -1,0 +1,44 @@
+@model cafe.Models.User
+
+<h2>Edit Staff</h2>
+
+<form asp-action="EditStaff" method="post">
+
+    <input type="hidden" asp-for="UserId" />
+    <input type="hidden" asp-for="PasswordHash" />
+
+    <div class="form-group">
+        <label>Name</label>
+        <input asp-for="FullName" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label>Email</label>
+        <input asp-for="Email" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label>Phone</label>
+        <input asp-for="Phone" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label>Role</label>
+        <select asp-for="Role" class="form-control">
+            <option>Admin</option>
+            <option>Manager</option>
+            <option>Kitchen</option>
+            <option>Cashier</option>
+        </select>
+    </div>
+
+    <div class="form-check">
+        <input asp-for="Status" class="form-check-input" />
+        <label>Active</label>
+    </div>
+
+    <br />
+
+    <button type="submit" class="btn btn-primary">Update</button>
+
+</form>

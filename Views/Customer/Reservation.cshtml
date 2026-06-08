@@ -1,0 +1,157 @@
+@{
+    ViewData["Title"] = "Reservation";
+}
+@{
+    ViewData["Title"] = "Book a Table";
+
+}
+
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-xl-8">
+            <div class="text-center mb-5">
+                <h2 class="h3 fw-bold text-primary mb-3">
+                    <i class="fas fa-calendar-check me-2"></i>Reserve a Table
+                </h2>
+                <p class="lead text-muted">Book your perfect table for a great dining experience</p>
+            </div>
+
+            <div class="row">
+                <!-- Reservation Form -->
+                <div class="col-lg-7">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <form id="reservationForm">
+                                <div class="row g-4">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Date <span class="text-danger">*</span></label>
+                                        <input type="date" class="form-control" id="reservationDate" required min="@DateTime.Today.ToString("yyyy-MM-dd")">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Time <span class="text-danger">*</span></label>
+                                        <select class="form-select" id="reservationTime" required>
+                                            <option value="">Select time</option>
+                                            @for (int h = 10; h <= 22; h++)
+                                            {
+                                                <option value="@h:00">@h:00</option>
+                                                <option value="@h:30">@h:30</option>
+                                            }
+                                        </select>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label fw-bold">Number of People</label>
+                                        <select class="form-select" id="peopleCount">
+                                            <option value="2">2 people</option>
+                                            <option value="4">4 people</option>
+                                            <option value="6">6 people</option>
+                                            <option value="8">8+ people</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label fw-bold">Special Requests</label>
+                                        <textarea class="form-control" id="specialRequests" rows="3" placeholder="Any special requirements?"></textarea>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="card-footer bg-light border-0 text-center pt-0">
+                            <button class="btn btn-primary btn-lg px-5" id="submitReservation">
+                                <i class="fas fa-check me-2"></i>Reserve Table
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Available Tables -->
+                <div class="col-lg-5">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-success text-white">
+                            <h6 class="mb-0 fw-bold">
+                                <i class="fas fa-table me-2"></i>Available Tables
+                            </h6>
+                        </div>
+                        <div class="card-body p-0" id="tablesList">
+                            <!-- Tables populated by ViewBag or AJAX -->
+                            @if (ViewBag.Tables != null)
+                            {
+                                foreach (var table in ViewBag.Tables as List<cafe.Models.CafeTable>)
+                                {
+                                    <div class="table-item p-3 border-bottom cursor-pointer hover-bg-light" data-table-id="@table.TableId" data-capacity="@table.Capacity">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="mb-1 fw-bold">Table @table.TableNumber</h6>
+                                                <small class="text-success">
+                                                    <i class="fas fa-users me-1"></i>@table.Capacity seats
+                                                </small>
+                                            </div>
+                                            <div class="text-end">
+                                                <span class="badge bg-success">Available</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+    $(document).ready(function() {
+        let selectedTableId = null;
+
+        // Table selection
+        $('.table-item').click(function() {
+            $('.table-item').removeClass('bg-light border-primary');
+            $(this).addClass('bg-light border-primary');
+            selectedTableId = $(this).data('table-id');
+        });
+
+        $('#submitReservation').click(async function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                reservationDate: $('#reservationDate').val(),
+                reservationTime: $('#reservationTime').val(),
+                tableId: selectedTableId,
+                peopleCount: $('#peopleCount').val(),
+                specialRequests: $('#specialRequests').val()
+            };
+
+            if (!formData.reservationDate || !formData.reservationTime) {
+                alert('Please select date and time');
+                return;
+            }
+
+            const btn = $(this);
+            btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Reserving...');
+
+            try {
+                const response = await $.ajax({
+                    url: '/Customer/ReserveTable',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(formData)
+                });
+
+                if (response.success) {
+                    alert(response.message || 'Table reserved successfully!');
+                    $('#reservationForm')[0].reset();
+                    $('.table-item').removeClass('bg-light border-primary');
+                    selectedTableId = null;
+                } else {
+                    alert(response.message || 'Reservation failed');
+                }
+            } catch (error) {
+                alert('Reservation failed. Please try again.');
+            } finally {
+                btn.prop('disabled', false).html('<i class="fas fa-check me-2"></i>Reserve Table');
+            }
+        });
+    });
+    </script>
+}

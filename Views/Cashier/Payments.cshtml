@@ -1,0 +1,81 @@
+@{
+    ViewData["Title"] = "Payments";
+}
+@model List<Payment>
+@{
+    ViewData["Title"] = "Process Payments";
+}
+
+<div class="payments-container">
+    <style>
+        .payments-container { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; min-height: 100vh; padding: 20px; }
+        .payment-card { background: white; border-radius: 15px; padding: 25px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); transition: all 0.3s; }
+        .payment-card:hover { box-shadow: 0 20px 40px rgba(0,0,0,0.15); }
+        .pending-badge { background: #fff3cd; color: #856404; padding: 10px 20px; border-radius: 25px; font-weight: bold; }
+        .process-btn { padding: 12px 30px; border-radius: 30px; font-weight: bold; font-size: 1.1rem; border: none; }
+        .btn-cash { background: linear-gradient(135deg, #ffecd2, #fcb69f); color: #d63384; }
+        .btn-upi { background: linear-gradient(135deg, #a8edea, #fed6e3); color: #0d6efd; }
+    </style>
+
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="fas fa-credit-card text-success me-3"></i>Pending Payments (@Model.Count)</h1>
+            <a href="/Cashier/Dashboard" class="btn btn-outline-primary btn-lg"><i class="fas fa-home"></i></a>
+        </div>
+
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5">
+                <i class="fas fa-hand-holding-usd fa-5x text-success mb-4"></i>
+                <h3 class="text-success">No pending payments!</h3>
+                <p class="text-muted">All payments have been processed.</p>
+            </div>
+        }
+        else
+        {
+            @foreach (var payment in Model)
+            {
+                <div class="payment-card">
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+                        <div>
+                            <h3>Payment #@payment.PaymentId</h3>
+                            <span class="pending-badge"><i class="fas fa-clock me-1"></i>PENDING</span>
+                        </div>
+                        <div class="text-end">
+                            <h2 class="text-primary mb-0">₹@(payment.Amount?.ToString("F2") ?? "0.00")</h2>
+                            <small class="text-muted">Order #@payment.Order?.OrderId</small>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Customer:</strong> @(payment.Order?.Customer?.Name ?? "N/A")</p>
+                            <p><strong>Table:</strong> Table @(payment.Order?.Table?.TableNumber)</p>
+                            <p><strong>Order Time:</strong> @payment.Order?.OrderTime.ToString("dd/MM/yyyy hh:mm tt")</p>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="text-center mt-3">
+                                <form asp-action="ProcessPayment" method="post" style="display: inline;" 
+                                      onclick="return confirm('Process as CASH payment?')">
+                                    <input type="hidden" name="paymentId" value="@payment.PaymentId" />
+                                    <button type="submit" class="process-btn btn-cash me-3">
+                                        <i class="fas fa-money-bill-wave me-2"></i>Cash
+                                    </button>
+                                </form>
+                                
+                                <form asp-action="ProcessPayment" method="post" style="display: inline;" 
+                                      onclick="return confirm('Process as UPI payment?')">
+                                    <input type="hidden" name="paymentId" value="@payment.PaymentId" />
+                                    <input type="hidden" name="paymentMethod" value="UPI" />
+                                    <button type="submit" class="process-btn btn-upi">
+                                        <i class="fas fa-mobile-alt me-2"></i>UPI
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>

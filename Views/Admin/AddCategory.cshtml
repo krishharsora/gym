@@ -1,0 +1,114 @@
+
+@model cafe.Models.MenuCategory
+@{
+    ViewData["Title"] = "Add Category";
+
+}
+
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-xl-6">
+            <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+                <div class="card-header bg-gradient-info text-white p-4 rounded-top-4">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-plus-circle fa-2x me-3 opacity-75"></i>
+                        <div>
+                            <h3 class="mb-1 fw-bold">Add New Category</h3>
+                            <p class="mb-0 opacity-90">Create a new menu category</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-5">
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-danger border-0 rounded-3 mb-4">
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            @Html.ValidationSummary(false)
+                        </div>
+                    }
+
+                    <form asp-action="AddCategory" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <div class="row g-4">
+                            <!-- Category Name -->
+                            <div class="col-12">
+                                <label asp-for="CategoryName" class="form-label fw-bold fs-5 mb-2">
+                                    Category Name <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text bg-white border-primary">
+                                        <i class="fas fa-tag text-primary"></i>
+                                    </span>
+                                    <input asp-for="CategoryName" class="form-control form-control-lg shadow-sm @GetValidationClass("CategoryName")" 
+                                           placeholder="e.g., Beverages, Main Course, Desserts" />
+                                </div>
+                                <div class="invalid-feedback">
+                                    @Html.ValidationMessageFor(m => m.CategoryName)
+                                </div>
+                            </div>
+
+                            <!-- Description -->
+                            <div class="col-12">
+                                <label asp-for="Description" class="form-label fw-bold fs-5 mb-2">
+                                    Description
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white">
+                                        <i class="fas fa-align-left text-secondary"></i>
+                                    </span>
+                                    <textarea asp-for="Description" class="form-control shadow-sm @GetValidationClass("Description")" 
+                                              rows="3" placeholder="Brief description of this category..."></textarea>
+                                </div>
+                                <div class="invalid-feedback">
+                                    @Html.ValidationMessageFor(m => m.Description)
+                                </div>
+                            </div>
+
+                            
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="row mt-5">
+                            <div class="col-md-6">
+                                <a asp-action="Categories" class="btn btn-outline-secondary btn-lg w-100 shadow-sm">
+                                    <i class="fas fa-arrow-left me-2"></i>Back to Categories
+                                </a>
+                            </div>
+                            <div class="col-md-6">
+                                <button type="submit" class="btn btn-primary btn-lg w-100 shadow-sm">
+                                    <i class="fas fa-plus-circle me-2"></i>Create Category
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+    // Form validation styling
+    document.addEventListener('DOMContentLoaded', function() {
+        const inputs = document.querySelectorAll('.form-control');
+        inputs.forEach(input => {
+            input.addEventListener('blur', function() {
+                if (this.classList.contains('is-invalid')) {
+                    this.parentNode.classList.add('border-danger');
+                }
+            });
+        });
+    });
+    </script>
+}
+
+@functions {
+    public string GetValidationClass(string fieldName)
+    {
+        return ViewData.ModelState.ContainsKey(fieldName) && 
+               !ViewData.ModelState[fieldName].Errors.Any() ? "is-valid" : "is-invalid";
+    }
+}

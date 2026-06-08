@@ -1,0 +1,218 @@
+@model cafe.Models.CustomerDashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+
+}
+
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="h3 mb-0 text-primary fw-bold">
+                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                </h2>
+                <div class="cart-badge position-relative">
+                    <a href="/Customer/Cart" class="btn btn-outline-primary">
+                        <i class="fas fa-shopping-cart me-1"></i>Cart
+                        @if (Model.CartCount > 0)
+                        {
+                            <span class="badge bg-danger position-absolute top-0 start-100 translate-middle">
+                                @Model.CartCount
+                            </span>
+                        }
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-5">
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm h-100 text-center bg-primary text-white">
+                <div class="card-body">
+                    <i class="fas fa-shopping-bag fa-2x mb-2 opacity-75"></i>
+                    <h4 class="mb-1">@(Model?.ActiveOrders?.Count ?? 0)</h4>
+                    <p class="mb-0 small">Active Orders</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm h-100 text-center bg-success text-white">
+                <div class="card-body">
+                    <i class="fas fa-calendar-check fa-2x mb-2 opacity-75"></i>
+                    <h4 class="mb-1">@(Model?.UpcomingReservations?.Count ?? 0)</h4>
+                    <p class="mb-0 small">Upcoming Reservations</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm h-100 text-center bg-warning text-white">
+                <div class="card-body">
+                    <i class="fas fa-utensils fa-2x mb-2 opacity-75"></i>
+                    <h4 class="mb-1">View Menu</h4>
+                    <p class="mb-0 small">New Orders</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm h-100 text-center bg-info text-white">
+                <div class="card-body">
+                    <i class="fas fa-star fa-2x mb-2 opacity-75"></i>
+                    <h4 class="mb-1">Leave Feedback</h4>
+                    <p class="mb-0 small">Rate Us</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-5">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 pb-0">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-bolt me-2 text-warning"></i>Quick Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <a href="/Customer/Menu" class="btn btn-outline-primary w-100 h-100 p-4 text-center">
+                                <i class="fas fa-utensils fa-2x mb-2 d-block"></i>
+                                <span class="fw-bold">Order Food</span>
+                            </a>
+                        </div>
+                        <div class="col-md-4">
+                            <a href="/Customer/Reservation" class="btn btn-outline-success w-100 h-100 p-4 text-center">
+                                <i class="fas fa-calendar fa-2x mb-2 d-block"></i>
+                                <span class="fw-bold">Book Table</span>
+                            </a>
+                        </div>
+                        <div class="col-md-4">
+                            <a href="/Customer/Orders" class="btn btn-outline-info w-100 h-100 p-4 text-center">
+                                <i class="fas fa-list fa-2x mb-2 d-block"></i>
+                                <span class="fw-bold">My Orders</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 pb-0">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-clock me-2 text-info"></i>Recent Activity
+                    </h5>
+                </div>
+                <div class="card-body py-3">
+                    @if (Model?.ActiveOrders != null && Model.ActiveOrders.Any())
+                    {
+                        @foreach (var order in Model.ActiveOrders.Take(3))
+                        {
+                            <div class="d-flex align-items-center py-2 border-bottom">
+                                <div class="flex-shrink-0">
+                                    <div class="avatar-sm bg-light rounded-circle d-flex align-items-center justify-content-center">
+                                        <i class="fas fa-shopping-bag text-primary"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="mb-0">#@order.OrderId</h6>
+                                    <small class="text-muted">@order.OrderStatus</small>
+                                </div>
+                                <small class="text-primary fw-bold">₹@order.TotalAmount</small>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center py-4 text-muted">
+                            <i class="fas fa-inbox fa-2x mb-3 opacity-50"></i>
+                            <p class="mb-0">No recent orders</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Orders -->
+    @if (Model.ActiveOrders.Any())
+    {
+        <div class="row">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white border-0 pb-0">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-shopping-cart me-2 text-success"></i>Active Orders
+                        </h5>
+                    </div>
+                    <div class="card-body pt-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Order #</th>
+                                        <th>Items</th>
+                                        <th>Table</th>
+                                        <th>Total</th>
+                                        <th>Status</th>
+                                        <th>Time</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var order in Model.ActiveOrders)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <strong>#@order.OrderId</strong>
+                                            </td>
+                                            <td>
+                                                @if (order.OrderItems != null && order.OrderItems.Any())
+                                                {
+                                                    <div class="d-flex flex-wrap gap-1">
+                                                        @foreach (var item in order.OrderItems.Take(2))
+                                                        {
+                                                            <span class="badge bg-light text-dark px-2 py-1 small">
+                                                                @item.MenuItem?.ItemName
+                                                            </span>
+                                                        }
+                                                        @if (order.OrderItems.Count > 2)
+                                                        {
+                                                            <span class="badge bg-secondary px-2 py-1 small">
+                                                                +@(order.OrderItems.Count - 2) more
+                                                            </span>
+                                                        }
+                                                    </div>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (order.Table != null)
+                                                {
+                                                    <span class="badge bg-info">@order.Table.TableNumber</span>
+                                                }
+                                            </td>
+                                            <td><strong>₹@order.TotalAmount</strong></td>
+                                            <td>
+                                                <span class="badge 
+                                                    @(order.OrderStatus == "Pending" ? "bg-warning" :
+                                                      order.OrderStatus == "Preparing" ? "bg-info" :
+                                                      order.OrderStatus == "Ready" ? "bg-success" : "bg-secondary")">
+                                                    @order.OrderStatus
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <small class="text-muted">@order.OrderTime.ToString("hh:mm tt")</small>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>

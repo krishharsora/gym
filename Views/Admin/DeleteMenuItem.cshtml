@@ -1,0 +1,162 @@
+@model cafe.Models.MenuItem
+@{
+    ViewData["Title"] = "Delete Menu Item";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid py-5 min-vh-100 d-flex align-items-center justify-content-center bg-gradient" 
+     style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 2rem 0;">
+    <div class="row justify-content-center">
+        <!-- ✅ PC/TV: col-xl-8 col-xxl-7 | Mobile: col-lg-7 -->
+        <div class="col-11 col-md-10 col-lg-8 col-xl-7 col-xxl-6">
+            <!-- Main Card -->
+            <div class="card shadow-2xl border-0 rounded-5 overflow-hidden animate__animated animate__fadeInUp">
+                <!-- Danger Header -->
+                <div class="card-header bg-gradient-danger text-white p-5 rounded-top-5 position-relative overflow-hidden">
+                    <!-- Animated Background -->
+                    <div class="position-absolute top-0 start-0 w-100 h-100 opacity-10">
+                        <div class="bg-white" style="animation: float 6s ease-in-out infinite;"></div>
+                    </div>
+                    
+                    <!-- Close Button -->
+                    <div class="position-absolute top-4 end-4 z-10">
+                        <a asp-action="MenuItems" class="btn-close btn-close-white shadow-sm" style="width: 2rem; height: 2rem;" title="Cancel"></a>
+                    </div>
+                    
+                    <!-- Icon & Title -->
+                    <div class="text-center mb-4 position-relative z-10">
+                        <div class="icon-wrapper mb-4 mx-auto">
+                            <i class="fas fa-exclamation-triangle fa-4x opacity-90"></i>
+                        </div>
+                        <h2 class="display-5 fw-bold mb-2 lh-1">Delete Menu Item?</h2>
+                        <p class="lead opacity-90 mb-0">This action cannot be undone</p>
+                    </div>
+                </div>
+
+                <!-- Content Body -->
+                <div class="card-body p-5 p-lg-6">
+                    <!-- Item Preview Card -->
+                    <div class="item-preview mb-5 p-4 bg-light rounded-4 shadow-sm border">
+                        <div class="row align-items-center g-4">
+                            <!-- Image -->
+                            <div class="col-4 col-sm-3 text-center">
+                                @{
+                                    var imageUrl = !string.IsNullOrEmpty(Model.ImageUrl) 
+                                        ? $"{Model.ImageUrl}"
+                                        : "~/images/placeholder-menu.jpg";
+                                }
+                                <div class="image-container position-relative mx-auto mb-3">
+                                    <img src="@imageUrl" alt="@Model.ItemName" 
+                                         class="rounded-4 shadow-lg img-fluid object-fit-cover" 
+                                         style="width: 100px; height: 100px; object-fit: cover;" />
+                                    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                                    {
+                                        <div class="position-absolute top-0 start-0 bg-danger text-white rounded-4 px-2 py-1 small fw-bold">
+                                            LIVE
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                            
+                            <!-- Details -->
+                            <div class="col-8 col-sm-9 ps-sm-4">
+                                <h4 class="fw-bold mb-3 text-dark lh-1">@Model.ItemName</h4>
+                                
+                                <!-- Category & Price -->
+                                <div class="d-flex flex-wrap gap-2 mb-3">
+                                    <span class="badge bg-primary px-3 py-2 fw-semibold">
+                                        @Model.Category?.CategoryName
+                                    </span>
+                                    <span class="badge bg-success px-3 py-2 fw-semibold fs-6">
+                                        <i class="fas fa-rupee-sign me-1"></i>@Model.Price
+                                    </span>
+                                    <span class="badge @(Model.IsAvailable ? "bg-success" : "bg-warning") px-3 py-2 fw-semibold">
+                                        @(Model.IsAvailable ? "Available" : "Unavailable")
+                                    </span>
+                                </div>
+                                
+                                <!-- Description -->
+                                @if (!string.IsNullOrEmpty(Model.Description))
+                                {
+                                    <p class="text-muted mb-0 lh-sm">@Model.Description</p>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Warning Alert -->
+                    <div class="alert alert-warning border-0 rounded-4 shadow-sm mb-5 p-4">
+                        <div class="d-flex align-items-start">
+                            <i class="fas fa-exclamation-triangle fa-2x text-warning me-3 flex-shrink-0 mt-1"></i>
+                            <div>
+                                <h6 class="mb-2 fw-bold text-warning">⚠️ Permanent Deletion</h6>
+                                <p class="mb-0 text-muted small">
+                                    This will <strong>permanently remove</strong> the menu item and its associated image 
+                                    from the database. This action cannot be undone or recovered.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex gap-3 justify-content-center flex-wrap">
+                        <!-- Delete Form -->
+                        <form asp-action="DeleteMenuItem" method="post" class="d-inline mb-0">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" asp-for="ItemId" />
+                            <button type="submit" class="btn btn-danger btn-lg px-6 py-3 shadow-lg fw-semibold border-0 rounded-4 position-relative overflow-hidden">
+                                <span class="position-absolute inset-0 bg-danger opacity-20 animate__animated animate__pulse animate__infinite"></span>
+                                <i class="fas fa-trash me-2"></i>
+                                <span>Yes, Delete Permanently</span>
+                            </button>
+                        </form>
+                        
+                        <!-- Cancel Button -->
+                        <a asp-action="MenuItems" class="btn btn-outline-secondary btn-lg px-6 py-3 shadow-lg fw-semibold rounded-4">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="card-footer bg-light text-center py-4 border-0">
+                    <small class="text-muted">
+                        Item ID: <strong>#@Model.ItemId</strong> | 
+                        Last modified: <em>@DateTime.Now.ToString("MMM dd, yyyy 'at' hh:mm tt")</em>
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .shadow-2xl {
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+    }
+    .bg-gradient-danger {
+        background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%) !important;
+    }
+    .object-fit-cover {
+        object-fit: cover !important;
+    }
+    .image-container {
+        position: relative;
+        display: inline-block;
+    }
+    @@keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+</style>
+
+@section Scripts {
+    <script>
+        // Confirm before delete
+        document.querySelector('form').addEventListener('submit', function(e) {
+            if (!confirm('Are you absolutely sure? This cannot be undone!')) {
+                e.preventDefault();
+            }
+        });
+    </script>
+}

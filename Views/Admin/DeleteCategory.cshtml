@@ -1,0 +1,40 @@
+@model cafe.Models.MenuCategory
+@{
+    ViewData["Title"] = "Delete Category";
+    Layout = "~/Views/Shared/_Layout.cshtml"; // Your layout
+}
+
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-xl-5">
+            <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+                <div class="card-header bg-gradient-danger text-white p-4 rounded-top-4 text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-exclamation-triangle fa-4x opacity-75"></i>
+                    </div>
+                    <h3 class="mb-1 fw-bold">Delete Category?</h3>
+                    <p class="mb-0 opacity-90">This action cannot be undone</p>
+                </div>
+                <div class="card-body p-5 text-center">
+                    <div class="mb-4">
+                        <h5 class="fw-bold text-danger mb-2">"@Model.CategoryName"</h5>
+                        <p class="text-muted mb-0">Are you sure?</p>
+                    </div>
+
+                    <!-- ✅ PERFECT FORM FOR ADMIN CONTROLLER -->
+                    <form asp-action="DeleteCategory" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="CategoryId" />
+                        <button type="submit" class="btn btn-danger btn-lg px-5 shadow-sm me-3">
+                            <i class="fas fa-trash me-2"></i>Yes, Delete
+                        </button>
+                        <a asp-action="Categories" class="btn btn-outline-secondary btn-lg px-5 shadow-sm">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </a>
+                    </form>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

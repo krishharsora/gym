@@ -1,0 +1,85 @@
+@{
+    ViewData["Title"] = "Reports";
+}
+@model IEnumerable<cafe.Models.ActivityLog>
+@{
+    ViewData["Title"] = "Activity Timeline";
+}
+
+<div class="container-fluid py-5 bg-gradient-timeline" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); min-height: 100vh;">
+    <!-- Header -->
+    <div class="row mb-6">
+        <div class="col-12 text-center">
+            <div class="display-4 fw-bold text-primary mb-3 animate__pulse">📊 Activity Reports</div>
+            <p class="lead text-muted fs-4">@Model.Count() total activities</p>
+        </div>
+    </div>
+
+    <!-- Timeline -->
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-xl-8">
+            <div class="position-relative">
+                <!-- Timeline Line -->
+                <div class="timeline-line position-absolute start-50 translate-middle-y bg-primary shadow" style="width: 4px; height: 100%; z-index: 1; top: 0; left: 50%; border-radius: 2px;"></div>
+                
+                @foreach (var item in Model.OrderByDescending(l => l.CreatedAt).Take(20))
+                {
+                    var index = Model.ToList().IndexOf(item);
+                    <div class="timeline-item position-relative mb-6 animate__fadeInUp" style="animation-delay: @(0.1 * index)s;">
+                        <!-- Timeline Dot -->
+                        <div class="timeline-dot position-absolute start-50 translate-middle z-2 shadow-lg" 
+                             style="width: 16px; height: 16px; top: 20px; left: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 50%; border: 4px solid white;"></div>
+                        
+                        <!-- Content Card -->
+                        <div class="card border-0 shadow-xl rounded-4 overflow-hidden h-100 @(index % 2 == 0 ? "timeline-right" : "timeline-left")">
+                            <div class="card-body p-5 ps-5">
+                                <div class="row align-items-start g-4">
+                                    <!-- Icon -->
+                                    <div class="col-auto">
+                                        <div class="activity-icon rounded-4 p-3 shadow-lg">
+                                            <i class="fas fa-@(item.Action.Contains("Added") ? "plus-circle" : item.Action.Contains("Updated") ? "edit" : "trash") fa-2x text-white"></i>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Content -->
+                                    <div class="col">
+                                        <div class="d-flex justify-content-between align-items-start mb-3">
+                                            <h5 class="fw-bold text-dark mb-0">@item.Action <span class="text-primary">'@item.Entity'</span></h5>
+                                            <span class="badge bg-gradient-info text-white px-3 py-2 rounded-pill fw-semibold">
+                                                @item.User?.Role
+                                            </span>
+                                        </div>
+                                        <p class="text-muted mb-3 fs-6">By <strong>@item.User?.FullName</strong></p>
+                                        <div class="row text-center">
+                                            <div class="col-md-6">
+                                                <small class="text-muted">Log ID</small>
+                                                <div class="h6 fw-bold text-primary">#@item.LogId</div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <small class="text-muted">Time</small>
+                                                <div class="h6 fw-bold text-success">@(item.CreatedAt?.ToString("hh:mm tt") ?? "N/A")</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-gradient-timeline { background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%) !important; }
+    .shadow-xl { box-shadow: 0 20px 40px -10px rgba(0,0,0,0.15) !important; }
+    .timeline-right { margin-left: 60px; }
+    .timeline-left { margin-right: 60px; }
+    .activity-icon { 
+        width: 70px; height: 70px; 
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex; align-items: center; justify-content: center;
+    }
+    .timeline-line { z-index: 0 !important; }
+</style>

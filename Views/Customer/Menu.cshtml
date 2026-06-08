@@ -1,0 +1,297 @@
+@{
+    ViewData["Title"] = "Menu";
+}
+@model cafe.Models.MenuViewModel
+
+<div class="container-fluid py-4 bg-light min-vh-100">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4 p-3 bg-white rounded-3 shadow-sm">
+                <h2 class="h3 mb-0 text-primary fw-bold">
+                    <i class="fas fa-utensils me-2"></i>Our Menu
+                </h2>
+                <div class="cart-badge position-relative">
+                    <a href="/Customer/Cart" class="btn btn-primary btn-lg position-relative">
+                        <i class="fas fa-shopping-cart me-2"></i>My Cart
+                        @if (Model?.CartCount > 0)
+                        {
+                            <span class="badge bg-danger position-absolute top-0 start-100 translate-middle border border-light rounded-pill" style="font-size: 0.75em;">
+                                <span id="cartCount">@Model.CartCount</span>
+                                <span class="visually-hidden">items</span>
+                            </span>
+                        }
+                    </a>
+                </div>
+            </div>
+
+            <!-- Category Filter -->
+            <div class="card border-0 shadow-sm mb-4 overflow-hidden">
+                <div class="card-body p-0">
+                    <div class="categories-nav bg-white px-4 py-3 border-bottom">
+                        <a href="/Customer/Menu" class="btn btn-sm btn-outline-primary active me-2 mb-1 mb-md-0">All</a>
+                        @foreach (var category in Model?.Categories ?? new List<MenuCategory>())
+                        {
+                            <a href="/Customer/Menu?category=@category.CategoryName.Replace(" ", "-")" 
+                               class="btn btn-sm btn-outline-secondary me-2 mb-1 mb-md-0">@category.CategoryName</a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Menu Items Grid -->
+    <div class="row g-4" id="menuItemsContainer">
+        @if (Model?.MenuItems != null && Model.MenuItems.Any())
+        {
+            @foreach (var item in Model.MenuItems)
+            {
+                <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
+                    <div class="card h-100 border-0 shadow-sm hover-lift transition-all">
+                        @if (!string.IsNullOrEmpty(item.ImageUrl))
+                        {
+                            <div class="position-relative overflow-hidden" style="height: 220px;">
+                                <img src="@item.ImageUrl" 
+                                     class="card-img-top w-100 h-100 object-fit-cover transition-transform" 
+                                     alt="@item.ItemName"
+                                     onerror="this.src='/images/no-image.png'">
+                                <div class="position-absolute top-2 end-2">
+                                    @if (item.IsAvailable)
+                                    {
+                                        <span class="badge bg-success">Available</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">Sold Out</span>
+                                    }
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="bg-gradient-light d-flex align-items-center justify-content-center text-center p-4" style="height: 220px;">
+                                <div>
+                                    <i class="fas fa-utensils fa-3x text-muted mb-2"></i>
+                                    <div class="text-muted small">@item.ItemName</div>
+                                </div>
+                            </div>
+                        }
+                        
+                        <div class="card-body d-flex flex-column p-3">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h6 class="card-title fw-bold mb-1 flex-grow-1" style="font-size: 1.1rem; line-height: 1.3;">
+                                    @item.ItemName
+                                </h6>
+                                @if (item.Category != null)
+                                {
+                                    <span class="badge bg-light text-dark text-uppercase px-2 py-1 small fw-semibold">
+                                        @item.Category.CategoryName
+                                    </span>
+                                }
+                            </div>
+                            
+                            @if (!string.IsNullOrEmpty(item.Description))
+                            {
+                                <p class="card-text text-muted small flex-grow-1 mb-3 line-clamp-2">@item.Description</p>
+                            }
+                            
+                            <div class="d-flex justify-content-between align-items-end mt-auto">
+                                <div>
+                                    <div class="h5 mb-0 fw-bold text-primary">₹@item.Price?.ToString("F0")</div>
+                                    @if (item.Price.HasValue)
+                                    {
+                                        <small class="text-success fw-semibold">Inclusive of tax</small>
+                                    }
+                                </div>
+                                
+                                @if (item.IsAvailable)
+                                {
+                                    <button class="btn btn-primary btn-lg px-4 add-to-cart-btn shadow-sm" 
+                                            data-item-id="@item.ItemId" 
+                                            data-item-name="@item.ItemName"
+                                            data-price="@item.Price">
+                                        <i class="fas fa-plus me-1"></i>Add
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button class="btn btn-outline-secondary btn-lg px-4" disabled>
+                                        <i class="fas fa-ban me-1"></i>Sold Out
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12">
+                <div class="text-center py-8 bg-white rounded-3 shadow-sm p-5">
+                    <i class="fas fa-utensils fa-4x text-muted mb-4 opacity-50"></i>
+                    <h4 class="text-muted mb-2">No menu items available</h4>
+                    <p class="text-muted mb-4">Please check back later or contact support.</p>
+                    <a href="/Customer/Menu" class="btn btn-primary">Refresh Menu</a>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .hover-lift {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .hover-lift:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.12) !important;
+    }
+    .hover-lift:hover .card-img-top {
+        transform: scale(1.05);
+    }
+    .categories-nav .btn {
+        transition: all 0.2s ease;
+    }
+    .categories-nav .btn.active {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-color: #667eea;
+        color: white !important;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+    .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .object-fit-cover {
+        object-fit: cover;
+    }
+    .transition-all {
+        transition: all 0.3s ease;
+    }
+    .transition-transform {
+        transition: transform 0.4s ease;
+    }
+</style>
+
+@section Scripts {
+    <!-- ✅ jQuery REQUIRED for AJAX -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script>
+    $(document).ready(function() {
+        console.log('Menu page loaded'); // Debug log
+
+        // Add to cart handler
+        $(document).on('click', '.add-to-cart-btn', function() {
+            const $btn = $(this);
+            const itemId = parseInt($btn.data('item-id'));
+            const itemName = $btn.data('item-name');
+            const price = parseFloat($btn.data('price'));
+
+            console.log('Adding to cart:', { itemId, itemName, price }); // Debug
+
+            if (!itemId || !price) {
+                alert('Invalid item data');
+                return;
+            }
+
+            // Loading state
+            $btn.prop('disabled', true)
+                .removeClass('btn-primary')
+                .addClass('btn-warning')
+                .html('<i class="fas fa-spinner fa-spin me-1"></i>Adding...');
+
+            // AJAX request
+            $.ajax({
+                url: '/Customer/AddToCart',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ 
+                    itemId: itemId, 
+                    quantity: 1 
+                }),
+                success: function(response) {
+                    console.log('Add to cart response:', response); // Debug
+                    
+                    if (response.success) {
+                        // Update cart badge
+                        updateCartBadge(response.cartCount);
+                        
+                        // Success feedback
+                        $btn.removeClass('btn-warning')
+                            .addClass('btn-success')
+                            .html('<i class="fas fa-check me-1"></i>Added!');
+                        
+                        // Reset button after 2 seconds
+                        setTimeout(function() {
+                            $btn.removeClass('btn-success')
+                                .addClass('btn-primary')
+                                .html('<i class="fas fa-plus me-1"></i>Add')
+                                .prop('disabled', false);
+                        }, 2000);
+                        
+                        // Optional: Show toast notification
+                        showToast(response.message, 'success');
+                    } else {
+                        alert(response.message || 'Failed to add item to cart');
+                        resetButton($btn);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('AJAX Error:', xhr.responseText); // Debug
+                    alert('Server error: ' + (xhr.responseJSON?.message || 'Please try again'));
+                    resetButton($btn);
+                }
+            });
+        });
+
+        // Category filter active state
+        $('.categories-nav a').click(function(e) {
+            $('.categories-nav a').removeClass('active btn-primary').addClass('btn-outline-secondary');
+            $(this).removeClass('btn-outline-secondary').addClass('active btn-primary');
+        });
+
+        // Helper functions
+        function updateCartBadge(count) {
+            const $badge = $('#cartCount');
+            if (count > 0) {
+                if ($badge.length) {
+                    $badge.text(count);
+                } else {
+                    $('.cart-badge a').append(
+                        `<span class="badge bg-danger position-absolute top-0 start-100 translate-middle border border-light rounded-pill" style="font-size: 0.75em;">
+                            <span id="cartCount">${count}</span>
+                            <span class="visually-hidden">items</span>
+                         </span>`
+                    );
+                }
+            } else {
+                $('.cart-badge .badge').remove();
+            }
+        }
+
+        function resetButton($btn) {
+            $btn.removeClass('btn-warning btn-success')
+                .addClass('btn-primary')
+                .html('<i class="fas fa-plus me-1"></i>Add')
+                .prop('disabled', false);
+        }
+
+        function showToast(message, type = 'success') {
+            // Simple toast notification
+            const toast = $(`
+                <div class="position-fixed top-20 end-0 p-3" style="z-index: 9999;">
+                    <div class="alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show shadow-lg" role="alert">
+                        ${message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                </div>
+            `);
+            $('body').append(toast);
+            setTimeout(() => toast.remove(), 4000);
+        }
+    });
+    </script>
+}

@@ -1,0 +1,482 @@
+@{
+    ViewData["Title"] = "Feedback";
+}
+@model List<Feedback>
+@{
+    ViewData["Title"] = "Customer Feedback";
+}
+
+<style>
+/* ===========================================
+   COMPLETE MANAGER UI STYLES - FULL SYSTEM
+=========================================== */
+* { box-sizing: border-box; }
+
+body { 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+}
+
+.manager-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    animation: fadeIn 0.6s ease-in;
+}
+
+@@keyframes fadeIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+.page-header {
+    text-align: center;
+    margin-bottom: 40px;
+    color: #2c3e50;
+}
+
+.page-header h1 {
+    font-size: 2.8rem;
+    margin: 0 0 15px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    background: rgba(255,255,255,0.95);
+    padding: 25px 50px;
+    border-radius: 30px;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+    backdrop-filter: blur(15px);
+}
+
+.page-subtitle {
+    font-size: 1.2rem;
+    color: #7f8c8d;
+    margin: 0;
+    font-weight: 300;
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    margin-bottom: 40px;
+}
+
+.stat-card {
+    background: rgba(255,255,255,0.95);
+    color: #2c3e50;
+    padding: 35px;
+    border-radius: 30px;
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    box-shadow: 0 25px 70px rgba(0,0,0,0.2);
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+}
+
+.stat-card.primary::before { background: linear-gradient(90deg, #667eea, #764ba2); }
+.stat-card.success::before { background: linear-gradient(90deg, #4facfe, #00f2fe); }
+.stat-card.warning::before { background: linear-gradient(90deg, #f093fb, #f5576c); }
+
+.stat-card:hover {
+    transform: translateY(-12px) scale(1.03);
+    box-shadow: 0 40px 100px rgba(0,0,0,0.3);
+}
+
+.stat-icon {
+    font-size: 3.2rem;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    flex-shrink: 0;
+}
+
+.stat-card.primary .stat-icon { background: linear-gradient(135deg, #667eea, #764ba2); }
+.stat-card.success .stat-icon { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+.stat-card.warning .stat-icon { background: linear-gradient(135deg, #f093fb, #f5576c); }
+
+.stat-content h3 {
+    font-size: 2.8rem;
+    margin: 0 0 10px 0;
+    font-weight: 900;
+}
+
+.stat-content p {
+    margin: 0;
+    opacity: 0.85;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+/* Cards & Tables */
+.card {
+    background: rgba(255,255,255,0.95);
+    border-radius: 30px;
+    box-shadow: 0 25px 70px rgba(0,0,0,0.2);
+    overflow: hidden;
+    transition: all 0.4s ease;
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.4);
+}
+
+.card:hover {
+    box-shadow: 0 35px 90px rgba(0,0,0,0.3);
+    transform: translateY(-8px);
+}
+
+.card-header {
+    background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(248,250,252,0.95));
+    padding: 30px 35px;
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+
+.card-header h3 {
+    margin: 0;
+    font-size: 1.6rem;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    color: #2c3e50;
+    font-weight: 800;
+}
+
+.card-body {
+    padding: 35px;
+}
+
+.modern-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 1.05rem;
+    background: white;
+    border-radius: 25px;
+    overflow: hidden;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+}
+
+.modern-table th {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px 18px;
+    text-align: left;
+    font-weight: 800;
+    font-size: 1rem;
+    letter-spacing: 0.8px;
+}
+
+.modern-table td {
+    padding: 20px 18px;
+    border-bottom: 1px solid #f8f9fa;
+}
+
+.modern-table tbody tr:hover {
+    background: linear-gradient(135deg, #f8f9ff, #f0f2ff);
+    transform: scale(1.015);
+}
+
+.order-id {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 30px;
+    font-size: 1rem;
+    font-weight: 800;
+    box-shadow: 0 6px 20px rgba(102,126,234,0.4);
+}
+
+.status-badge {
+    padding: 10px 20px;
+    border-radius: 30px;
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+}
+
+.status-badge.primary { background: linear-gradient(135deg, #667eea, #764ba2); }
+.status-badge.success { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+.status-badge.warning { background: linear-gradient(135deg, #f093fb, #f5576c); }
+.status-badge.paid { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+.status-badge.pending { background: linear-gradient(135deg, #f39c12, #e67e22); }
+
+/* Payment Method Badges */
+.payment-method {
+    padding: 8px 18px;
+    border-radius: 25px;
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.payment-method.cash {
+    background: linear-gradient(135deg, #f39c12, #e67e22);
+}
+
+.payment-method.upi {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+}
+
+/* Responsive */
+@@media (max-width: 768px) {
+    .stats-grid { grid-template-columns: 1fr; }
+    .page-header h1 { font-size: 2.2rem; padding: 20px 25px; }
+}
+
+/* Additional Table Styles */
+.tables-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 30px;
+    margin-top: 30px;
+}
+
+.table-card {
+    background: rgba(255,255,255,0.95);
+    border-radius: 25px;
+    padding: 35px 25px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255,255,255,0.3);
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.table-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+}
+
+.table-card.available::before { background: linear-gradient(90deg, #43e97b, #38f9d7); }
+.table-card.reserved::before { background: linear-gradient(90deg, #f39c12, #e67e22); }
+.table-card.occupied::before { background: linear-gradient(90deg, #e74c3c, #c0392b); }
+
+.table-card:hover {
+    transform: translateY(-15px) scale(1.05);
+    box-shadow: 0 40px 100px rgba(0,0,0,0.25);
+}
+
+.table-number {
+    font-size: 4rem;
+    font-weight: 900;
+    color: #2c3e50;
+    margin-bottom: 15px;
+    text-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.table-capacity {
+    color: #7f8c8d;
+    font-size: 1.2rem;
+    margin-bottom: 25px;
+    font-weight: 500;
+}
+
+.qr-code {
+    margin-top: 20px;
+}
+
+.qr-code img {
+    width: 100px;
+    height: 100px;
+    border-radius: 20px;
+    border: 4px solid rgba(255,255,255,0.3);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+}
+
+.table-card:hover .qr-code img {
+    transform: scale(1.1);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+}
+
+
+/* Feedback Specific Styles */
+.feedback-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 35px;
+    margin-top: 30px;
+}
+
+.feedback-card {
+    background: rgba(255,255,255,0.95);
+    border-radius: 30px;
+    padding: 40px;
+    box-shadow: 0 25px 70px rgba(0,0,0,0.2);
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.4);
+    border-left: 6px solid #667eea;
+    position: relative;
+    overflow: hidden;
+}
+
+.feedback-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+}
+
+.feedback-card:hover {
+    transform: translateY(-15px) rotateX(5deg);
+    box-shadow: 0 45px 120px rgba(102,126,234,0.3);
+}
+
+.feedback-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 25px;
+}
+
+.stars {
+    font-size: 2.2rem;
+    color: #f39c12;
+    text-shadow: 0 4px 12px rgba(243,156,18,0.4);
+    margin-right: 20px;
+}
+
+.feedback-meta {
+    text-align: right;
+}
+
+.customer {
+    display: block;
+    font-weight: 900;
+    color: #2c3e50;
+    font-size: 1.3rem;
+    margin-bottom: 5px;
+}
+
+.date {
+    color: #7f8c8d;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.feedback-content p {
+    margin: 0;
+    line-height: 1.8;
+    color: #5a6c7d;
+    font-size: 1.15rem;
+    font-style: italic;
+}
+
+.feedback-order {
+    margin-top: 25px;
+    padding: 12px 25px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 30px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #667eea;
+    display: inline-block;
+    box-shadow: 0 5px 20px rgba(102,126,234,0.15);
+}
+</style>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+<div class="manager-container">
+    <div class="page-header">
+        <h1><i class="fas fa-comments"></i> Customer Feedback</h1>
+        <p class="page-subtitle">What your customers are saying about your cafe</p>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card primary">
+            <div class="stat-icon"><i class="fas fa-star"></i></div>
+            <div class="stat-content">
+                <h3>@Model.Average(f => f.Rating ?? 0).ToString("F1")</h3>
+                <p>Average Rating</p>
+            </div>
+        </div>
+        <div class="stat-card success">
+            <div class="stat-icon"><i class="fas fa-thumbs-up"></i></div>
+            <div class="stat-content">
+                <h3>@Model.Count(f => f.Rating >= 4)</h3>
+                <p>5-Star Reviews</p>
+            </div>
+        </div>
+        <div class="stat-card warning">
+            <div class="stat-icon"><i class="fas fa-exclamation-triangle"></i></div>
+            <div class="stat-content">
+                <h3>@Model.Count(f => f.Rating < 3)</h3>
+                <p>Low Ratings</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="feedback-grid">
+        @foreach (var feedback in Model)
+        {
+            <div class="feedback-card">
+                <div class="feedback-top">
+                    <div class="stars">@GenerateStars(feedback.Rating ?? 0)</div>
+                    <div class="feedback-meta">
+                        <span class="customer">@(feedback.Customer?.Name ?? "Anonymous Customer")</span>
+                        <span class="date">@feedback.CreatedAt?.ToString("dd MMM yyyy")</span>
+                    </div>
+                </div>
+                <div class="feedback-content">
+                    <p>"@feedback.Comments"</p>
+                </div>
+                @if (feedback.OrderId.HasValue)
+                {
+                    <div class="feedback-order">
+                        <i class="fas fa-shopping-cart"></i> Order #@feedback.OrderId
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@functions {
+    string GenerateStars(int rating)
+    {
+        var stars = "";
+        for (int i = 1; i <= 5; i++)
+        {
+            stars += i <= rating ? "★" : "☆";
+        }
+        return stars;
+    }
+}
